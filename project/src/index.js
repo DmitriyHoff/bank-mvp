@@ -187,7 +187,7 @@ app.get('/currencies', authCheck, (req, res) => {
 app.post('/currency-buy', authCheck, (req, res) => {
 	const { from, to, amount: rawAmount } = (req.body || {})
 	const myCurrencies = data.mine.currencies || {}
-
+	console.log('Request:', req);
 	const amount = Number(rawAmount)
 
 	if (!KNOWN_CURRENCY_CODES.includes(from) || !KNOWN_CURRENCY_CODES.includes(to)) {
