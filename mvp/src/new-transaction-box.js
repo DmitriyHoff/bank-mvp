@@ -6,7 +6,7 @@ export default class NewTransactionBox {
   constructor() {
     this.container = el('.accounts__transaction-box');
   }
-  render() {
+  get html() {
     return this.container;
   }
 }

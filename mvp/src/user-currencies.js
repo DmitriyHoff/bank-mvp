@@ -23,7 +23,7 @@ export default class UserCurrencies {
     this.#currencies = array;
     this.refreshContainer();
   }
-  render() {
+  get html() {
     return this.container;
   }
   refreshContainer() {

@@ -1,4 +1,4 @@
-import { el, mount } from 'redom';
+import { el } from 'redom';
 import * as ymaps from 'ymaps';
 
 export default class Atm extends EventTarget {
@@ -30,7 +30,6 @@ export default class Atm extends EventTarget {
       this.#createMap();
       if (onMapLoaded) onMapLoaded();
     });
-    //this.#createMap();
   }
 
   get banks() {
@@ -68,7 +67,7 @@ export default class Atm extends EventTarget {
   centerMap() {
     this.map.setBounds(this.map.geoObjects.getBounds());
   }
-  render() {
+  get html() {
     return this.container;
   }
 }

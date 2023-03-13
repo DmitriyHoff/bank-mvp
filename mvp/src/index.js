@@ -14,7 +14,7 @@ import AccountInfoPage from './account-info-page';
 
 const header = new Header();
 header.addNavbar();
-mount(window.document.body, header.render());
+mount(window.document.body, header.html);
 const main = el('main');
 mount(window.document.body, main);
 
@@ -67,7 +67,7 @@ router.on({
   '/': () => {
     document.title = 'Главная';
     const loginBox = new LoginBox();
-    main.replaceChildren(loginBox.render());
+    main.replaceChildren(loginBox.html);
   },
   '/login': () => {
     document.title = 'Вход';
@@ -126,7 +126,7 @@ function setAtmPage() {
     });
   });
 
-  main.replaceChildren(atm.render());
+  main.replaceChildren(atm.html);
 
   console.log('atm page');
 }
@@ -164,7 +164,7 @@ function setCurrencyPage() {
         });
       });
   });
-  main.replaceChildren(currencyPage.render());
+  main.replaceChildren(currencyPage.html);
   console.log('currency page');
 }
 
@@ -175,7 +175,7 @@ function setAccountInfoPage(p) {
   logging.then(() => {
     server.getAccount(account).then((data) => {
       const accountInfo = new AccountInfoPage(data.payload);
-      main.replaceChildren(accountInfo.render());
+      main.replaceChildren(accountInfo.html);
     });
   });
 }
@@ -197,7 +197,7 @@ function setUserAccountPage() {
           accountsList.addAccountToList(acc);
         });
     });
-    main.replaceChildren(accountsList.render());
+    main.replaceChildren(accountsList.html);
   });
 
   console.log('account page');

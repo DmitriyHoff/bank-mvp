@@ -47,7 +47,7 @@ export default class Header {
 
     this.#container = el('header.header', el('.header__logo', 'Coin.'));
   }
-  render() {
+  get html() {
     return this.#container;
   }
 

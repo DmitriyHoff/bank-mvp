@@ -31,7 +31,7 @@ export default class RateChange {
     ]);
   }
 
-  render() {
+  get html() {
     return this.container;
   }
 }

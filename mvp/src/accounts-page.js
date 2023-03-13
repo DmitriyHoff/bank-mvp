@@ -59,7 +59,7 @@ export default class AccountPage {
   refreshContainer() {
     const children = [];
     this.accountsListArray.forEach((account) => {
-      children.push(account.render());
+      children.push(account.html);
     });
     this.accountsList.replaceChildren(...children);
   }
@@ -80,7 +80,7 @@ export default class AccountPage {
     }
     this.refreshContainer();
   }
-  render() {
+  get html() {
     return this.container;
   }
 }

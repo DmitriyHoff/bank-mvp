@@ -48,7 +48,7 @@ export default class ExchangeBox {
     this.selectTo = this.container.querySelector('.input[name="to"]');
     this.inputAmount = this.container.querySelector('.input[name="amount"]');
   }
-  render() {
+  get html() {
     return this.container;
   }
   set userCurrencies(currencies) {

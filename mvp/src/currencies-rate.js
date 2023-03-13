@@ -16,7 +16,7 @@ export default class CurrenciesRate {
       this.#list,
     ]);
   }
-  render() {
+  get html() {
     return this.container;
   }
 
@@ -29,11 +29,11 @@ export default class CurrenciesRate {
       (element) => element.from === newRate.from && element.to === newRate.to
     );
     if (index !== -1) {
-      this.#list.replaceChild(newRate.render(), this.pairs[index].render());
+      this.#list.replaceChild(newRate.html, this.pairs[index].html);
       this.pairs[index] = newRate;
     } else {
       this.pairs.push(newRate);
-      this.#list.appendChild(newRate.render());
+      this.#list.appendChild(newRate.html);
     }
   }
 }

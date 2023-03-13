@@ -61,7 +61,7 @@ export default class Account {
       return dateTimeFormat.format(this.lastTransaction.date);
     } else return '-';
   }
-  render() {
+  get html() {
     return this.container;
   }
 }

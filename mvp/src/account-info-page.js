@@ -56,35 +56,35 @@ export default class AccountInfoPage {
         el('p.accounts__balance', `Баланс: ${this.balance}`),
       ]),
       el('.accounts__middle-container', [
-        this.transactionsBox.render(),
+        this.transactionsBox.html,
         el('.accounts__charts', [
-          el('.accounts__dynamic', [this.dynamicChart.render()]),
-          el('.accounts__ratio', [this.ratioChart.render()], { hidden: true }),
+          el('.accounts__dynamic', [this.dynamicChart.html]),
+          el('.accounts__ratio', [this.ratioChart.html], { hidden: true }),
         ]),
       ]),
 
-      el('.accounts__transactions-wrap', this.transactionsList.render()),
+      el('.accounts__transactions-wrap', this.transactionsList.html),
     ]);
 
-    this.dynamicChart.render().addEventListener('click', () => {
+    this.dynamicChart.html.addEventListener('click', () => {
       this.dynamicChart.redraw();
       const ratio = document.querySelector('.accounts__ratio');
       if (!ratio.hidden) {
         setTimeout(() => {
           ratio.hidden = true;
-          this.transactionsBox.render().hidden = false;
+          this.transactionsBox.html.hidden = false;
         }, 500);
       } else {
-        this.transactionsBox.render().hidden = true;
+        this.transactionsBox.html.hidden = true;
         setTimeout(() => (ratio.hidden = false), 0);
       }
       setTimeout(() => ratio.classList.toggle('accounts__ratio--active'), 10);
     });
     // Отслеживаем изменение размера контейнера
-    // new ResizeObserver(() => {}).observe(this.dynamicChart.render());
+    // new ResizeObserver(() => {}).observe(this.dynamicChart.html);
   }
 
-  render() {
+  get html() {
     return this.container;
   }
 }

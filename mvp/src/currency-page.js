@@ -20,13 +20,13 @@ export default class CurrencyPage {
 
     const subContainer = this.container.querySelector('.exchange__container');
     subContainer.append(
-      this.userCurrencies.render(),
-      this.currenciesRate.render(),
-      this.exchangeBox.render()
+      this.userCurrencies.html(),
+      this.currenciesRate.html(),
+      this.exchangeBox.html()
     );
   }
 
-  render() {
+  get html() {
     return this.container;
   }
 
@@ -41,7 +41,7 @@ export default class CurrencyPage {
 
   setNewCurrencyRate(newRate) {
     const subContainer = this.container.querySelector('.exchange__container');
-    subContainer.replaceChild(newRate.render(), this.currenciesRate.render());
+    subContainer.replaceChild(newRate.html(), this.currenciesRate.html());
     this.currenciesRate = newRate;
   }
 }

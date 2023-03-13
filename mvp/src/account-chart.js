@@ -57,7 +57,7 @@ export default class AccountChart {
       this.type !== 'dynamics'
     );
   }
-  render() {
+  get html() {
     return this.container;
   }
 

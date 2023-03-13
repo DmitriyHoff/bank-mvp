@@ -56,7 +56,7 @@ export default class LoginBox {
     });
   }
 
-  render() {
+  get html() {
     return this.container;
   }
 }

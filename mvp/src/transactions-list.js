@@ -41,7 +41,7 @@ export default class TransactionsList {
     ]);
     this.init();
   }
-  render() {
+  get html() {
     return this.container;
   }
 
