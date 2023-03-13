@@ -20,6 +20,8 @@ mount(window.document.body, main);
 
 const server = new ServerAPI();
 const currencyRate = new CurrenciesRate();
+
+// | Обработчики событий WebSocket
 const websocketHandlers = {
   onOpen: () => {
     console.log('[open] Connection established');
@@ -35,15 +37,13 @@ const websocketHandlers = {
   },
   onMessage: (event) => {
     const message = JSON.parse(event.data);
-    // console.log(`[message] Data received from server: ${event.data}`);
-    // console.log('from', message);
+
     const rate = new RateChange(
       message.from,
       message.to,
       message.rate,
       message.change
     );
-    // console.log(rate);
     currencyRate.pushRate(rate);
   },
   onError: (error) => {
@@ -63,6 +63,7 @@ const logging = server.login('developer', 'skillbox').then(() => {
 
 const router = new Navigo('/');
 
+// Навигация по сайту
 router.on({
   '/': () => {
     document.title = 'Главная';
@@ -74,7 +75,7 @@ router.on({
     main.replaceChildren();
     console.log('login page');
   },
-  '/account/:id': (p) => setAccountInfoPage(p),
+  '/account/:id': (params) => setAccountInfoPage(params),
   '/account': () => setUserAccountPage(),
 
   '/currency': {
