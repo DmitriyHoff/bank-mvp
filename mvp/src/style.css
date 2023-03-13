@@ -150,6 +150,18 @@ ul {
   margin-bottom: 50px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  gap: 35px;
+}
+.accounts__title {
+  font: 700 34px/40px 'Work Sans', sans-serif;
+}
+.accounts__order {
+  margin-left: 0;
+  margin-right: auto;
+  width: auto;
+  min-width: auto;
+  flex-grow: 0;
 }
 .accounts__list {
   display: grid;
