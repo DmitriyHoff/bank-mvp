@@ -1,11 +1,23 @@
 export default class ServerAPI extends EventTarget {
   url;
   token;
-  isLoggedIn = false;
+  #isOnline = false;
   socket;
   constructor(url = 'http://localhost:3000') {
     super();
     this.url = url;
+    this.loadToken();
+  }
+
+  get isOnline() {
+    return this.#isOnline;
+  }
+  saveToken() {
+    window.localStorage.setItem('access_token', this.token);
+  }
+  loadToken() {
+    this.token = window.localStorage.getItem('access_token');
+    if (this.token) this.#isOnline = true;
   }
   /**
    * Авторизоваться
@@ -24,7 +36,12 @@ export default class ServerAPI extends EventTarget {
     });
 
     const data = await response.json();
-    this.token = await data.payload.token;
+    console.log('[server: login] ', data);
+    this.token = data.payload?.token;
+    if (this.token) {
+      this.#isOnline = true;
+      this.saveToken();
+    }
     return data;
   }
 
@@ -46,7 +63,7 @@ export default class ServerAPI extends EventTarget {
       },
     });
     const data = await response.json();
-    console.log(data);
+    console.log('[server: get account] ', data);
     return data;
   }
 
@@ -58,7 +75,7 @@ export default class ServerAPI extends EventTarget {
       },
     });
     const data = await response.json();
-    console.log(data);
+    console.log('[server: create account]', data);
     return data;
   }
 
@@ -75,7 +92,7 @@ export default class ServerAPI extends EventTarget {
       }),
     });
     const data = await response.json();
-    console.log(data);
+    console.log('[server: transfer funds] ', data);
     return data;
   }
 
@@ -99,7 +116,7 @@ export default class ServerAPI extends EventTarget {
       },
     });
     const data = await response.json();
-    console.log(data);
+    console.log('[server: get currencies] ', data);
     return data;
   }
 
@@ -117,7 +134,7 @@ export default class ServerAPI extends EventTarget {
       }),
     });
     const data = await response.json();
-    console.log(data);
+    console.log('[server: buy currencies] ', data);
     return data;
   }
 
@@ -143,7 +160,13 @@ export default class ServerAPI extends EventTarget {
       },
     });
     const data = await response.json();
-    //console.log(data.payload);
+    console.log('[server: get banks] ', data);
     return data.payload;
+  }
+  logout() {
+    window.localStorage.removeItem('access_token');
+    this.token = null;
+    this.#isOnline = false;
+    console.log('[server: logout]');
   }
 }

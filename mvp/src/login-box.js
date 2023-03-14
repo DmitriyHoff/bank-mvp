@@ -17,12 +17,16 @@ export default class LoginBox {
   container;
 
   /**
-   * @callback onFormSubmitCallback
-   * @type {onFormSubmitCallback}
+   * @callback submitCallback
+   * @type {submitCallback}
    */
   onSubmit;
 
-  constructor() {
+  /**
+   *
+   * @param {submitCallback} submitHandler
+   */
+  constructor(submitHandler) {
     this.container = el(
       '.login-box',
       el('form.form login-box__form', [
@@ -49,10 +53,20 @@ export default class LoginBox {
     this.loginInput = this.container.querySelector('input[name="login"]');
     this.passwordInput = this.container.querySelector('input[name="password"]');
     this.submitBtn = this.container.querySelector('.form__submit');
+    this.onSubmit = submitHandler;
 
+    this.loginInput.addEventListener('keydown', (e) => {
+      // e.preventDefault();
+      console.log('as', e.data);
+      return false;
+    });
     this.form.addEventListener('submit', (e) => {
       e.preventDefault();
-      if (this.onSubmit) this.onSubmit();
+      this.onSubmit({
+        event: e,
+        login: this.loginInput.value,
+        password: this.passwordInput.value,
+      });
     });
   }
 

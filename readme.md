@@ -27,7 +27,6 @@
 ### Установка и запуск
 
 1.  Склонируйте репозиторий на свой компьютер:
-
 ```shell
 git clone https://gitlab.skillbox.ru/dmitrii_goff/dpo_js_advanced_diploma.git
 ```
