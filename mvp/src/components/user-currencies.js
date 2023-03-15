@@ -1,11 +1,17 @@
 import { el, setChildren } from 'redom';
+import Component from './component';
 
-export default class UserCurrencies {
-  #currencies;
-  #list;
-  container;
+export default class UserCurrencies extends Component {
+  _currencies;
+
+  /** @type {HTMLUListElement} */
+  _list;
+
+  /** @type {HTMLElement} */
+  _container;
   constructor() {
-    this.container = el('.currencies-own exchange__currencies-own', [
+    super();
+    this._container = el('.currencies-own exchange__currencies-own', [
       el('h2.currencies-own__title', 'Ваши валюты'),
       el('ul.currencies-own__list', [
         el('li.currencies-own__list-item', [
@@ -14,23 +20,23 @@ export default class UserCurrencies {
         ]),
       ]),
     ]);
-    this.#list = this.container.querySelector('.currencies-own__list');
+    this._list = this._container.querySelector('.currencies-own__list');
   }
   /**
    * @param {any} array
    */
   set currencies(array) {
-    this.#currencies = array;
+    this._currencies = array;
     this.refreshContainer();
   }
   get html() {
-    return this.container;
+    return this._container;
   }
   refreshContainer() {
     let children = [];
-    console.log('cur', this.#currencies);
-    if (this.#currencies) {
-      this.#currencies.forEach((element) => {
+    console.log('cur', this._currencies);
+    if (this._currencies) {
+      this._currencies.forEach((element) => {
         children.push(
           el('li.currencies-own__list-item', [
             el('p.currencies-own__list-key', `${element.code}`),
@@ -39,6 +45,6 @@ export default class UserCurrencies {
         );
       });
     }
-    setChildren(this.#list, children);
+    setChildren(this._list, children);
   }
 }

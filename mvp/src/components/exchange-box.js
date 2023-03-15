@@ -1,22 +1,26 @@
 import { el } from 'redom';
+import Component from './component';
 
-export default class ExchangeBox {
+export default class ExchangeBox extends Component {
   #userCurrencies;
   #avaliableCurrencies;
 
-  form;
+  /** @type {HTMLFormElement} */
+  _form;
 
   /** @type {HTMLSelectElement} */
-  selectFrom;
+  _selectFrom;
 
   /** @type {HTMLSelectElement} */
-  selectTo;
-  container;
+  _selectTo;
+  // container;
 
-  submitHandler;
+  /** @type {HTMLInputElement} */
+  _inputAmount;
 
   constructor() {
-    this.container = el('.exchange-box exchange__exchange-box', [
+    super();
+    this._container = el('.exchange-box exchange__exchange-box', [
       el('form.exchange-box__form', [
         el('h2.exchange-box__title', 'Обмен валюты'),
         el('.exchange-box__container', [
@@ -43,29 +47,29 @@ export default class ExchangeBox {
         ]),
       ]),
     ]);
-    this.form = this.container.querySelector('form');
-    this.selectFrom = this.container.querySelector('.input[name="from"]');
-    this.selectTo = this.container.querySelector('.input[name="to"]');
-    this.inputAmount = this.container.querySelector('.input[name="amount"]');
+    this._form = this._container.querySelector('form');
+    this._selectFrom = this._container.querySelector('.input[name="from"]');
+    this._selectTo = this._container.querySelector('.input[name="to"]');
+    this._inputAmount = this._container.querySelector('.input[name="amount"]');
   }
-  get html() {
-    return this.container;
-  }
+
+  /** @param {string[]} currencies */
   set userCurrencies(currencies) {
-    this.#userCurrencies = currencies;
+    this._userCurrencies = currencies;
     currencies.forEach((element) => {
-      this.selectFrom.append(el('option', element));
+      this._selectFrom.append(el('option', element));
     });
   }
 
+  /** @param {string[]} currencies */
   set avaliableCurrencies(currencies) {
-    this.#avaliableCurrencies = currencies;
+    this._avaliableCurrencies = currencies;
     currencies.forEach((element) => {
-      this.selectTo.append(el('option', element));
+      this._selectTo.append(el('option', element));
     });
   }
 
   addSubmitHandler(handler) {
-    this.form.addEventListener('submit', handler);
+    this._form.addEventListener('submit', handler);
   }
 }

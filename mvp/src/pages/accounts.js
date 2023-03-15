@@ -1,30 +1,30 @@
 import { el } from 'redom';
-import Account from './account';
+import AccountItem from '../components/account-item.js';
 
 export default class AccountPage {
   /** @type {HTMLElement} */
-  accountsList;
+  _accountsList;
 
-  /** @type {Array.<Account>} */
-  accountsListArray = [];
+  /** @type {AccountItem[]} */
+  _accountsListArray = [];
 
   /** @type {HTMLSelectElement} */
-  select;
+  _select;
   /** @type {HTMLElement} */
-  addButton;
+  _addButton;
 
   /** @type {HTMLElement} */
-  container;
+  _container;
 
   /**
-   * @callback onAddButtonClickCallback
-   * @param {onAddButtonClickCallback} onAddAccount
+   * @callback addAccountCallback
+   * @param {addAccountCallback} onAddAccount
    */
   constructor(onAddAccount = null) {
-    this.container = el('section.accounts', [
+    this._container = el('section.accounts', [
       el('.accounts__header', [
         el('h1.accounts__title', 'Ваши счета'),
-        (this.select = el('select.input accounts__order', [
+        (this._select = el('select.input accounts__order', [
           el('option.accounts__order-option', 'По номеру', {
             value: 'number',
           }),
@@ -40,47 +40,46 @@ export default class AccountPage {
       el('ul.accounts__list'),
     ]);
 
-    this.accountsList = this.container.querySelector('.accounts__list');
-    this.addButton = this.container.querySelector('.accounts__add-btn');
+    this._accountsList = this._container.querySelector('.accounts__list');
+    this._addButton = this._container.querySelector('.accounts__add-btn');
 
-    this.select.addEventListener('change', (e) => {
+    this._select.addEventListener('change', (e) => {
       this.sortArray(e.target.value);
     });
     if (onAddAccount) {
-      this.addButton.addEventListener('click', onAddAccount);
+      this._addButton.addEventListener('click', onAddAccount);
     }
   }
   addAccountToList({ account, balance, transactions }) {
-    this.accountsListArray.push(
-      new Account({ account, balance, transactions })
+    this._accountsListArray.push(
+      new AccountItem({ account, balance, transactions })
     );
     this.refreshContainer();
   }
   refreshContainer() {
     const children = [];
-    this.accountsListArray.forEach((account) => {
+    this._accountsListArray.forEach((account) => {
       children.push(account.html);
     });
-    this.accountsList.replaceChildren(...children);
+    this._accountsList.replaceChildren(...children);
   }
   sortArray(type) {
     switch (type) {
       case 'number':
-        this.accountsListArray.sort((a, b) => a.id - b.id);
+        this._accountsListArray.sort((a, b) => a._id - b._id);
         break;
       case 'balance':
-        this.accountsListArray.sort((a, b) => a.balance - b.balance);
+        this._accountsListArray.sort((a, b) => a._balance - b._balance);
         break;
       case 'date':
-        this.accountsListArray.sort(
-          (a, b) =>
-            new Date(a.lastTransactionDate) - new Date(b.lastTransactionDate)
+        this._accountsListArray.sort(
+          (a, b) => a.lastTransactionDate - b.lastTransactionDate
         );
         break;
     }
     this.refreshContainer();
   }
   get html() {
-    return this.container;
+    return this._container;
   }
 }

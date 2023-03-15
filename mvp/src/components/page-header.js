@@ -1,17 +1,19 @@
 import { el } from 'redom';
+import Component from './component';
 
-export default class Header {
+export default class PageHeader extends Component {
   /** @type {HTMLElement} */
-  #container;
+  _container;
 
   /** @type {HTMLElement} */
-  #navBar;
+  _navBar;
 
   /** @type {boolean} */
-  #hasNav;
+  _hasNav;
 
   constructor() {
-    this.#navBar = el(
+    super();
+    this._navBar = el(
       'nav.nav header__nav',
       el('ul.nav__list', [
         el(
@@ -45,25 +47,25 @@ export default class Header {
       ])
     );
 
-    this.#container = el('header.header', el('.header__logo', 'Coin.'));
+    this._container = el('header.header', el('.header__logo', 'Coin.'));
   }
   get html() {
-    return this.#container;
+    return this._container;
   }
 
   /** Добавляет панель навигации */
   addNavbar() {
-    if (!this.#hasNav) {
-      this.#container.append(this.#navBar);
+    if (!this._hasNav) {
+      this._container.append(this._navBar);
     }
-    this.#hasNav = !this.#hasNav;
+    this._hasNav = !this._hasNav;
   }
 
   /** Удаляет панель навигации в header */
   removeNavbar() {
-    if (this.#hasNav) {
-      this.#navBar.remove();
+    if (this._hasNav) {
+      this._navBar.remove();
     }
-    this.#hasNav = !this.#hasNav;
+    this._hasNav = !this._hasNav;
   }
 }

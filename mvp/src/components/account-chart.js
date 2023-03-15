@@ -1,71 +1,86 @@
 import { el } from 'redom';
 import Chart from 'chart.js/auto';
+import Component from './component';
 
-export default class AccountChart {
-  type;
-  account;
-  balance;
-  transactions;
-  columnsCount = 12;
-  chart;
-  data;
-  container;
+const COLOR_RED = '#FD4E5D';
+const COLOR_BLUE = '#116ACC';
+const COLOR_GREEN = '#76CA66';
 
-  constructor({ account, balance, transactions }, type = 'dynamics') {
-    this.account = account;
-    this.balance = balance;
-    this.transactions = transactions;
-    this.type = type;
-    this.container = el('canvas#acquisitions');
+export default class AccountChart extends Component {
+  /**
 
-    this.data = this.transactionsToChartData();
-    const canvas = this.container;
+   */
+  /** @type {string} */
+  _type;
+
+  /** @type {string} */
+  _account;
+
+  /** @type {number} */
+  _balance;
+
+  /** @type {object[]} */
+  _transactions;
+
+  /** @type {number} */
+  _columnsCount = 12;
+
+  /** @type {Chart} */
+  _chart;
+
+  /** @type {object[]} */
+  _data;
+
+  constructor(
+    { account, balance, transactions, type = 'dynamics' },
+    columnsCount = 12
+  ) {
+    super();
+    this._account = account;
+    this._balance = balance;
+    this._transactions = transactions;
+    this._type = type;
+    this._container = el('canvas#acquisitions');
+
+    this._data = this.transactionsToChartData();
+    const canvas = this._container;
     switch (type) {
       case 'dynamics':
-        this.columnsCount = 6;
-        this.chart = this.drawChart(
+        this._columnsCount = columnsCount;
+        this._chart = this.drawChart(
           canvas,
-          this.getLastDataItems(this.columnsCount),
+          this.getLastDataItems(this._columnsCount),
           false
         );
         break;
       case 'ratio':
-        this.chart = this.drawChart(
+        this._chart = this.drawChart(
           canvas,
-          this.getLastDataItems(this.columnsCount),
+          this.getLastDataItems(this._columnsCount),
           true
         );
         break;
     }
+  }
 
-    // this.container.addEventListener('click', () => {
-    //   this.columnsCount = 10;
-    //   this.chart.destroy();
-    //   this.chart = this.drawChart(
-    //     this.container,
-    //     this.getLastDataItems(),
-    //     this.type !== 'dynamics'
-    //   );
-    // });
-  }
-  redraw() {
-    this.columnsCount = this.columnsCount === 12 ? 6 : 12;
-    this.chart.destroy();
-    this.chart = this.drawChart(
-      this.container,
-      this.getLastDataItems(),
-      this.type !== 'dynamics'
-    );
-  }
-  get html() {
-    return this.container;
-  }
+  // // Переключает вид между 6 и 12 месяцев
+  // redraw() {
+  //   this._columnsCount = this._columnsCount === 12 ? 6 : 12;
+  //   this._chart.destroy();
+  //   this._chart = this.drawChart(
+  //     this._container,
+  //     this.getLastDataItems(),
+  //     this._type !== 'dynamics'
+  //   );
+  //}
+  // get html() {
+  //   return this._container;
+  // }
 
   drawChart(cavas, data, stacked = false) {
     let min, med, max;
 
     if (stacked) {
-      console.log('stacked!');
       min = 0;
 
       // отметка Max на графике
@@ -81,7 +96,7 @@ export default class AccountChart {
         0
       );
     } else {
-      // отметка Min на графике - минимальная динамик
+      // отметка Min на графике - минимальная динамика
       min = data.reduce(
         (accumulator, currentValue) =>
           Math.min(accumulator, currentValue.dinamic),
@@ -101,7 +116,7 @@ export default class AccountChart {
     Chart.defaults.font.weight = 'bold';
     Chart.defaults.color = 'black';
 
-    // Плагин, рисует рамку
+    // Плагин, рисует рамку графика
     const customBorder = {
       id: 'customBorder',
       beforeDatasetDraw: (charts) => {
@@ -140,13 +155,13 @@ export default class AccountChart {
               {
                 color: '#000',
                 borderColor: '#0000ff',
-                backgroundColor: '#FD4E5D',
+                backgroundColor: COLOR_RED,
                 data: data.map((row) => row.out),
               },
               {
                 color: '#000',
                 borderColor: '#0000ff',
-                backgroundColor: '#76CA66',
+                backgroundColor: COLOR_GREEN,
                 data: data.map((row) => row.in),
               },
             ]
@@ -154,7 +169,7 @@ export default class AccountChart {
               {
                 color: '#000',
                 borderColor: '#0000ff',
-                backgroundColor: '#116ACC',
+                backgroundColor: COLOR_BLUE,
                 data: data.map((row) => row.dinamic),
               },
             ],
@@ -239,15 +254,15 @@ export default class AccountChart {
   }
 
   transactionsToChartData() {
-    const newarray = this.transactions.map((el) => ({
+    const newarray = this._transactions.map((el) => ({
       // если отправитель не равен текущему счёту > входящий
-      in: el.from !== this.account ? el.amount : 0,
+      in: el.from !== this._account ? el.amount : 0,
 
       // если отправитель равен текущему счёту > исходящий
-      out: el.from === this.account ? el.amount : 0,
+      out: el.from === this._account ? el.amount : 0,
 
       // динамика счёта: пополнение - положительная, перевод - отрицательная
-      dinamic: el.from !== this.account ? el.amount : -el.amount,
+      dinamic: el.from !== this._account ? el.amount : -el.amount,
 
       // дата в виде "месяц_yyyy"
       date: new Date(el.date).toLocaleDateString('ru-Ru', {
@@ -287,7 +302,7 @@ export default class AccountChart {
 
   /** Возвращает количество последних элементов, указанное в columnsCount */
   getLastDataItems() {
-    const result = this.data.slice(-this.columnsCount);
+    const result = this._data.slice(-this._columnsCount);
     console.log('[getLastItems] result:', result);
     return result;
   }

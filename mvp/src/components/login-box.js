@@ -1,20 +1,15 @@
 import { el } from 'redom';
+import Component from './component';
 
-export default class LoginBox {
+export default class LoginBox extends Component {
   /** @type {HTMLFormElement} */
-  form;
+  _form;
 
   /** @type {HTMLInputElement} */
-  loginInput;
+  _loginInput;
 
   /** @type {HTMLInputElement} */
-  passwordInput;
-
-  /** @type {HTMLButtonElement} */
-  submitBtn;
-
-  /** @type {HTMLElement} */
-  container;
+  _passwordInput;
 
   /**
    * @callback submitCallback
@@ -27,7 +22,8 @@ export default class LoginBox {
    * @param {submitCallback} submitHandler
    */
   constructor(submitHandler) {
-    this.container = el(
+    super();
+    this._container = el(
       '.login-box',
       el('form.form login-box__form', [
         el('h1.form__title', 'Вход в аккаунт'),
@@ -49,28 +45,26 @@ export default class LoginBox {
       ])
     );
 
-    this.form = this.container.querySelector('.form');
-    this.loginInput = this.container.querySelector('input[name="login"]');
-    this.passwordInput = this.container.querySelector('input[name="password"]');
-    this.submitBtn = this.container.querySelector('.form__submit');
+    this._form = this._container.querySelector('.form');
+    this._loginInput = this._container.querySelector('input[name="login"]');
+    this._passwordInput = this._container.querySelector(
+      'input[name="password"]'
+    );
+    this._submitBtn = this._container.querySelector('.form__submit');
     this.onSubmit = submitHandler;
 
-    this.loginInput.addEventListener('keydown', (e) => {
+    this._loginInput.addEventListener('keydown', (e) => {
       // e.preventDefault();
       console.log('as', e.data);
       return false;
     });
-    this.form.addEventListener('submit', (e) => {
+    this._form.addEventListener('submit', (e) => {
       e.preventDefault();
       this.onSubmit({
         event: e,
-        login: this.loginInput.value,
-        password: this.passwordInput.value,
+        login: this._loginInput.value,
+        password: this._passwordInput.value,
       });
     });
-  }
-
-  get html() {
-    return this.container;
   }
 }

@@ -1,31 +1,47 @@
+/** @constant {string} */
+const DEFAULT_URL = 'http://localhost:3000';
+
 export default class ServerAPI extends EventTarget {
-  url;
-  token;
-  #isOnline = false;
-  socket;
-  constructor(url = 'http://localhost:3000') {
+  /** @type {string} */
+  _url;
+
+  /** @type {string} */
+  _token;
+
+  /** @type {boolean} */
+  _isOnline;
+
+  /** @type {WebSocket} */
+  _socket;
+
+  /** @param {string} url */
+  constructor(url = DEFAULT_URL) {
     super();
-    this.url = url;
+    this._url = url;
     this.loadToken();
   }
 
   get isOnline() {
-    return this.#isOnline;
+    return this._isOnline;
   }
+
+  /** Записывает полученный `access_token` в `localStorage` */
   saveToken() {
-    window.localStorage.setItem('access_token', this.token);
+    window.localStorage.setItem('access_token', this._token);
   }
+
+  /** Загружает `access_token` из `localStorage` */
   loadToken() {
-    this.token = window.localStorage.getItem('access_token');
-    if (this.token) this.#isOnline = true;
+    this._token = window.localStorage.getItem('access_token');
+    if (this._token) this._isOnline = true;
   }
   /**
-   * Авторизоваться
+   * Выполняет попытку авторизации на сервере
    * @param {string} login Логин
    * @param {string} password Пароль
    */
   async login(login, password) {
-    let url = new URL(this.url + '/login');
+    let url = new URL(this._url + '/login');
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -37,18 +53,18 @@ export default class ServerAPI extends EventTarget {
 
     const data = await response.json();
     console.log('[server: login] ', data);
-    this.token = data.payload?.token;
-    if (this.token) {
-      this.#isOnline = true;
+    this._token = data.payload?.token;
+    if (this._token) {
+      this._isOnline = true;
       this.saveToken();
     }
     return data;
   }
 
   async getAccounts() {
-    const response = await fetch(this.url + '/accounts', {
+    const response = await fetch(this._url + '/accounts', {
       headers: {
-        Authorization: `Basic ${this.token}`,
+        Authorization: `Basic ${this._token}`,
       },
     });
     const data = await response.json();
@@ -57,9 +73,9 @@ export default class ServerAPI extends EventTarget {
   }
 
   async getAccount(id) {
-    const response = await fetch(this.url + '/account/' + id, {
+    const response = await fetch(this._url + '/account/' + id, {
       headers: {
-        Authorization: `Basic ${this.token}`,
+        Authorization: `Basic ${this._token}`,
       },
     });
     const data = await response.json();
@@ -68,10 +84,10 @@ export default class ServerAPI extends EventTarget {
   }
 
   async createAccount() {
-    const response = await fetch(this.url + '/create-account', {
+    const response = await fetch(this._url + '/create-account', {
       method: 'POST',
       headers: {
-        Authorization: `Basic ${this.token}`,
+        Authorization: `Basic ${this._token}`,
       },
     });
     const data = await response.json();
@@ -80,10 +96,10 @@ export default class ServerAPI extends EventTarget {
   }
 
   async transferFunds(from, to, amount) {
-    const response = await fetch(this.url + '/transfer-funds', {
+    const response = await fetch(this._url + '/transfer-funds', {
       method: 'POST',
       headers: {
-        Authorization: `Basic ${this.token}`,
+        Authorization: `Basic ${this._token}`,
       },
       body: JSON.stringify({
         from,
@@ -97,10 +113,10 @@ export default class ServerAPI extends EventTarget {
   }
 
   async getAllCurrencies() {
-    const response = await fetch(this.url + '/all-currencies', {
+    const response = await fetch(this._url + '/all-currencies', {
       method: 'GET',
       headers: {
-        Authorization: `Basic ${this.token}`,
+        Authorization: `Basic ${this._token}`,
       },
     });
     const data = await response.json();
@@ -109,10 +125,10 @@ export default class ServerAPI extends EventTarget {
   }
 
   async getCurrencies() {
-    const response = await fetch(this.url + '/currencies', {
+    const response = await fetch(this._url + '/currencies', {
       method: 'GET',
       headers: {
-        Authorization: `Basic ${this.token}`,
+        Authorization: `Basic ${this._token}`,
       },
     });
     const data = await response.json();
@@ -121,10 +137,10 @@ export default class ServerAPI extends EventTarget {
   }
 
   async buyCurrency({ from, to, amount }) {
-    const response = await fetch(this.url + '/currency-buy', {
+    const response = await fetch(this._url + '/currency-buy', {
       method: 'POST',
       headers: {
-        Authorization: `Basic ${this.token}`,
+        Authorization: `Basic ${this._token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -139,24 +155,24 @@ export default class ServerAPI extends EventTarget {
   }
 
   async feedCurrency({ onOpen, onClose, onMessage, onError }) {
-    let socketUrl = new URL(this.url);
+    let socketUrl = new URL(this._url);
     socketUrl.protocol = 'ws:';
 
-    this.socket = new WebSocket(socketUrl + 'currency-feed', ['soap', 'wamp']);
+    this._socket = new WebSocket(socketUrl + 'currency-feed', ['soap', 'wamp']);
 
-    this.socket.onopen = onOpen;
-    this.socket.onmessage = onMessage;
-    this.socket.onclose = onClose;
-    this.socket.onerror = onError;
+    this._socket.onopen = onOpen;
+    this._socket.onmessage = onMessage;
+    this._socket.onclose = onClose;
+    this._socket.onerror = onError;
   }
   async feedCurrencyStop() {
-    if (this.socket) this.socket.close();
+    if (this._socket) this._socket.close();
   }
   async getBanks() {
-    const response = await fetch(this.url + '/banks', {
+    const response = await fetch(this._url + '/banks', {
       method: 'GET',
       headers: {
-        Authorization: `Basic ${this.token}`,
+        Authorization: `Basic ${this._token}`,
       },
     });
     const data = await response.json();
@@ -165,8 +181,8 @@ export default class ServerAPI extends EventTarget {
   }
   logout() {
     window.localStorage.removeItem('access_token');
-    this.token = null;
-    this.#isOnline = false;
+    this._token = null;
+    this._isOnline = false;
     console.log('[server: logout]');
   }
 }

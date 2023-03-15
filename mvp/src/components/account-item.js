@@ -1,31 +1,38 @@
+// eslint-disable-next-line no-unused-vars
+import * as Type from '../typedef';
 import { el } from 'redom';
-import Transaction from './transaction';
+// import Transaction from './transaction';
+import Component from './component';
 
-export default class Account {
+export default class AccountItem extends Component {
   /** @type {string} */
-  id;
+  _id;
 
   /** @type {number} */
-  balance;
+  _balance;
 
-  /** @type {Transaction}*/
-  lastTransaction;
+  /**
+   * @typedef {Type.Transaction} Transaction
+   * @type {Transaction} */
+  _lastTransaction;
 
-  /** @type {HTMLElement} */
-  container;
-
-  constructor({ account, balance, transactions }) {
-    this.id = account;
-    this.balance = balance;
-    this.lastTransaction =
-      transactions.length > 0 ? new Transaction(transactions.at(-1)) : null;
-    this.container = el(
+  /**
+   * @typedef {Type.Account} Account
+   * @param {Account} account
+   */
+  constructor(account) {
+    super();
+    this._id = account.account;
+    this._balance = account.balance;
+    this._lastTransaction =
+      account.transactions.length > 0 ? account.transactions.at(-1) : null;
+    this._container = el(
       'li.account accounts__list-item',
       el('.account__container', [
-        el('p.account__id', `${this.id}`),
+        el('p.account__id', `${this._id}`),
         el(
           'p.account__balance',
-          `${this.balance.toLocaleString('ru-RU', {
+          `${this._balance.toLocaleString('ru-RU', {
             style: 'currency',
             currency: 'RUB',
           })}`
@@ -39,7 +46,7 @@ export default class Account {
             ),
           ]),
           el('a.btn account__open-btn', 'Открыть', {
-            href: `/account/${this.id}`,
+            href: `/account/${this._id}`,
             'data-navigo': '',
           }),
         ]),
@@ -57,11 +64,8 @@ export default class Account {
       minute: 'numeric',
     };
     const dateTimeFormat = new Intl.DateTimeFormat('ru-RU', options);
-    if (this.lastTransaction) {
-      return dateTimeFormat.format(this.lastTransaction.date);
+    if (this._lastTransaction) {
+      return dateTimeFormat.format(new Date(this._lastTransaction.date));
     } else return '-';
-  }
-  get html() {
-    return this.container;
   }
 }

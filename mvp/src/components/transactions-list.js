@@ -1,18 +1,30 @@
+// eslint-disable-next-line no-unused-vars
+import * as Type from '../typedef';
 import { el, setChildren } from 'redom';
+import Component from './component';
 
-export default class TransactionsList {
-  /** @type {Array.<object>} */
-  transactions;
+/**
+ * @typedef {Type.Transaction} Transaction
+ * @typedef {Type.Account} Account
+ */
+export default class TransactionsList extends Component {
+  /** @type {Transaction[]} */
+  _transactions;
 
   /** @type {string} */
-  account;
+  _account;
 
-  /** @type {HTMLElement} */
-  container;
-  constructor({ transactions, account }) {
-    this.transactions = transactions;
-    this.account = account;
-    this.container = el('.transactions', [
+  /**
+   * @typedef {object} TransactionsListParams
+   * @property {Transaction[]} transactions
+   * @property {Account} account
+   * @param {|TransactionsListParams} params
+   */
+  constructor(params) {
+    super();
+    this._transactions = params.transactions;
+    this._account = params.account;
+    this._container = el('.transactions', [
       el('h2.transactions__title', 'История переводов'),
       el('table.transactions__table', [
         el('thead', [
@@ -41,17 +53,14 @@ export default class TransactionsList {
     ]);
     this.init();
   }
-  get html() {
-    return this.container;
-  }
 
   init() {
-    const list = this.transactions.slice(-25);
+    const list = this._transactions.slice(-25);
     const children = [];
 
     list.forEach((element) => {
       let amount;
-      const isPositive = element.to === this.account;
+      const isPositive = element.to === this._account;
       const options = {
         year: 'numeric',
         month: 'numeric',
@@ -75,7 +84,7 @@ export default class TransactionsList {
       );
       amount.classList.add(isPositive ? '--positive' : '--negative');
     });
-    setChildren(this.container.querySelector('tbody'), children);
+    setChildren(this._container.querySelector('tbody'), children);
     console.log(list);
   }
 }
