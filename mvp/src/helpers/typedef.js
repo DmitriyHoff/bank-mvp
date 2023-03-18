@@ -7,6 +7,8 @@
  * @property {string} to
  */
 
+import TransactionBox from "../components/transaction-box";
+
 /**
  * Информация о счёте
  *
@@ -40,6 +42,7 @@
 
 /**
  * @callback transactionCallback
+ * @param {TransactionBox} transBox
  * @param {TransferFund} fund
  */
 /**
@@ -76,4 +79,4 @@
  * @property {pageLoaderCallback} logoutPageLoader
  * Функция, отвечающая за отрисовку страницы при выходе.
  */
-export const Type = {};
+// export const Type = {};

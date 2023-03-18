@@ -110,17 +110,21 @@ async function accountInfoPageLoader(match) {
       chartsCallback: () => router.navigate(`history/${data.payload.account}`),
 
       // передаём функцию-обработчик для перевода средств на другой счёт
-      transactionCallback: async (fund) => {
+      transactionCallback: async (transactionBox, fund) => {
         const resp = await server.transferFunds(fund);
         if (resp.error === '') {
           accountInfo.updateInfo(resp.payload);
         } else {
           switch (resp.error) {
-            case `Overdraft prevented`: //
+            case `Overdraft prevented`:
+              transactionBox.setErrorText('amount', 'Недостаточно средств');
               break;
-            case 'Invalid account to': //
+            case 'Invalid account to':
+              transactionBox.setErrorText('dest', 'Счёт не найден');
               break;
-            case `Invalid amount`: //
+            case `Invalid amount`:
+              // эта строка вероятно никогда не появится
+              transactionBox.setErrorText('amount', 'Неверная сумма перевода');
               break;
           }
         }

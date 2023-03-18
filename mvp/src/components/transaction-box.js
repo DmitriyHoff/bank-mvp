@@ -109,7 +109,7 @@ export default class TransactionBox extends Component {
       }
 
       if (hasError) return;
-      this._onSubmit({
+      this._onSubmit(this, {
         from: this._account,
         to: this._destInput.value,
         amount: this._amountInput.value,
