@@ -1,4 +1,4 @@
-import { el } from 'redom';
+import { el, svg, setChildren } from 'redom';
 import AccountItem from '../components/account-item.js';
 
 export default class AccountPage {
@@ -23,7 +23,7 @@ export default class AccountPage {
   constructor(onAddAccount = null) {
     this._container = el('section.accounts', [
       el('.accounts__header', [
-        el('h1.accounts__title', 'Ваши счета'),
+        el('h1.page-title accounts__title', 'Ваши счета'),
         (this._select = el('select.input accounts__order', [
           el('option.accounts__order-option', 'По номеру', {
             value: 'number',
@@ -35,13 +35,17 @@ export default class AccountPage {
             value: 'date',
           }),
         ])),
-        el('button.btn accounts__add-btn', 'Создать новый счёт'),
+        el('button.btn accounts__add-btn', ''),
       ]),
       el('ul.accounts__list'),
     ]);
 
     this._accountsList = this._container.querySelector('.accounts__list');
     this._addButton = this._container.querySelector('.accounts__add-btn');
+
+    const svgParams = { width: '24', height: '24', viewBox: '0 0 24 24' };
+    const icon = svg('svg', svgParams, svg('use', { href: '#plus' }));
+    setChildren(this._addButton, [icon, el('span', 'Создать новый счёт')]);
 
     this._select.addEventListener('change', (e) => {
       this.sortArray(e.target.value);
@@ -50,7 +54,7 @@ export default class AccountPage {
       this._addButton.addEventListener('click', onAddAccount);
     }
   }
-  addAccountToList({ account, balance, transactions }) {
+  addAccount({ account, balance, transactions }) {
     this._accountsListArray.push(
       new AccountItem({ account, balance, transactions })
     );

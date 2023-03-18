@@ -4,6 +4,10 @@ import CurrenciesRate from '../components/currencies-rate';
 import ExchangeBox from '../components/exchange-box';
 import Component from '../components/component';
 
+/**
+ * @module CurrencyPage
+ * @augments Component
+ */
 export default class CurrencyPage extends Component {
   /** @type {UserCurrencies} */
   _userCurrencies;
@@ -14,10 +18,13 @@ export default class CurrencyPage extends Component {
   /** @type {ExchangeBox} */
   _exchangeBox;
 
+  /**
+   * @class CurrencyPage
+   */
   constructor() {
     super();
     this._container = el('section.exchange', [
-      el('h1.exchange__title', 'Валютный обмен'),
+      el('h1.page-title exchange__title', 'Валютный обмен'),
       el('.exchange__container'),
     ]);
     this._userCurrencies = new UserCurrencies();
@@ -34,7 +41,8 @@ export default class CurrencyPage extends Component {
 
   /**
    * Валютные счета пользователя
-   * @typedef {Object} Currency
+   *
+   * @typedef {object} Currency
    * @property {string} code
    * @property {number} amount
    * @param {Currency[]} currencies
@@ -47,6 +55,7 @@ export default class CurrencyPage extends Component {
 
   /**
    * Заменяет данные в списке курса обмена валют
+   *
    * @param {CurrenciesRate} rate
    */
   setNewCurrencyRate(rate) {

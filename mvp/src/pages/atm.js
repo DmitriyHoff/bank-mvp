@@ -3,7 +3,9 @@ import * as ymaps from 'ymaps';
 import Component from '../components/component';
 
 export default class Atm extends Component {
-  /** Точка с расположением банка
+  /**
+   * Точка с расположением банка
+   *
    * @typedef BankPosition
    * @type {object}
    * @property {number} lat Широта
@@ -24,13 +26,14 @@ export default class Atm extends Component {
 
   /**
    * Конструктор
+   *
    * @param {mapLoadedCallback} onMapLoaded
    */
   constructor(onMapLoaded = null) {
     super();
     this._container = el('.atm', [
-      el('h1.atm__title', 'Карта банкоматов'),
-      el('#map'),
+      el('h1.page-title atm__title', 'Карта банкоматов'),
+      el('.map__wrapper', el('#map')),
     ]);
 
     ymaps.ready(() => {
@@ -39,8 +42,10 @@ export default class Atm extends Component {
     });
   }
 
-  /** Расположение банков на карте
-   * @returns {BankPosition[]}*/
+  /**
+   * Расположение банков на карте
+   *
+    @returns {BankPosition[]}*/
   get banks() {
     return this._banks;
   }
@@ -59,10 +64,17 @@ export default class Atm extends Component {
     this._map = new ymaps.Map('map', {
       center: [55.76, 37.64],
       zoom: 10,
+      controls: ['zoomControl', 'fullscreenControl'],
     });
+
     this.dispatchEvent(new Event('mapLoaded'));
   }
-  /** Добавляет точку на карту */
+  /**
+   * Добавляет точку на карту
+   *
+   * @param lat
+   * @param lon
+   */
   setMapPoint(lat, lon) {
     if (this._map) {
       const placemark = new ymaps.Placemark(

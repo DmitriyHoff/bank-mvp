@@ -2,6 +2,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+
 // eslint-disable-next-line no-undef
 module.exports = (env) => ({
   target: 'web',
@@ -18,13 +19,22 @@ module.exports = (env) => ({
     },
   },
   plugins: [
-    new HtmlWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      meta: {
+        'http-equiv': 'X-UA-Compatiable',
+        content: 'IE=edge',
+      },
+    }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
   ],
   module: {
     rules: [
+      {
+        test: /\.svg$/i,
+        use: 'svg-sprite-loader',
+      },
       {
         test: /\.css$/i,
         use: [
@@ -37,6 +47,7 @@ module.exports = (env) => ({
   optimization: {
     minimizer: [new CssMinimizerPlugin()],
   },
+  // Подключение Яндекс.Карт
   externalsType: 'script',
   externals: {
     ymaps: [

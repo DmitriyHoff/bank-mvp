@@ -1,22 +1,27 @@
+// eslint-disable-next-line no-unused-vars
 import Navigo from 'navigo';
-
+/**
+ * @typedef {import('../helpers/typedef').pageLoaderCallback} pageLoaderCallback
+ * @typedef {import('../helpers/typedef').pageReadyCallback} pageReadyCallback
+ * @typedef {import('../helpers/typedef').pageLeaveCallback} pageLeaveCallback
+ * @typedef {import('../helpers/typedef').tokenCheckCallback} tokenCheckCallback
+ * @typedef {import('../helpers/typedef').networkCheckCallback} networkCheckCallback
+ * @typedef {import('../helpers/typedef').RouterParams} RouterParams
+ */
+/**
+ * Представляет маршрутизатор по страницам приложения
+ *
+ * @module Router
+ */
 export default class Router {
   /** @type {Navigo} */
   _router;
 
-  /**
-   * @callback isOnlineCheckCallback
-   * @returns {boolean}
-   */
+  /** @type {networkCheckCallback} */
+  _networkCheck;
 
-  /**
-   * @callback pageLoaderCallback
-   * @callback pageReadyCallback
-   * @callback pageLeaveCallback
-   */
-
-  /** @type {isOnlineCheckCallback} */
-  _isOnline;
+  /** @type {tokenCheckCallback} */
+  _tokenCheck;
 
   /** @type {pageLoaderCallback} */
   _loadAtm;
@@ -45,73 +50,64 @@ export default class Router {
   /** @type {pageLoaderCallback} */
   _logout;
 
+  /** @param {RouterParams} params */
+
   /**
-   * @typedef RouterParams
-   * @type {object}
-   * @property {isOnlineCheckCallback} isOnline
-   * Функция, которая будет проверять статус авторизации
-   * @property {pageLoaderCallback} atmPageLoader
-   * Функция, отвечающая за отрисовку страницы банкоматов.
-   * @property {pageLoaderCallback} loginPageLoader
-   * Функция, отвечающая за отрисовку страницы авторизации.
-   * @property {pageLoaderCallback} accountPageLoader
-   * Функция, отвечающая за отрисовку страницы со счетами.
-   * @property {pageLoaderCallback} accountInfoPageLoader
-   * Функция, отвечающая за отрисовку страницы с информацией о счёте.
-   * @property {pageLoaderCallback} accountHistoryPageLoader
-   * Функция, отвечающая за отрисовку страницы с подробными графиками.
-   * @property {pageLoaderCallback} currencyPageLoader
-   * Функция, отвечающая за отрисовку страницы курса валют.
-   * @property {pageReadyCallback} currencyPageReady
-   * Функция, которая вызывается, когда страница валют загружена.
-   * @property {pageLeaveCallback} currencyPageLeave
-   * Функция, которая вызываетя при переходе со страницы валют на другую.
-   * @property {pageLoaderCallback} logoutPageLoader
-   * Функция, отвечающая за отрисовку страницы при выходе.
-   * @param {RouterParams} params
+   * Инициализирует экземпляр класса Router
+   *
+   * @class Router
+   * @param {RouterParams} callbacks
+   * Функции, которые будут вызваны при переходах на страницы
    */
-  constructor({
-    isOnline,
-    atmPageLoader,
-    loginPageLoader,
-    accountPageLoader,
-    accountInfoPageLoader,
-    accountHistoryPageLoader,
-    currencyPageLoader,
-    currencyPageReady,
-    currencyPageLeave,
-    logoutPageLoader,
-  }) {
-    this._isOnline = isOnline;
-    this._loadAtm = atmPageLoader;
-    this._loadLogin = loginPageLoader;
-    this._loadAccount = accountPageLoader;
-    this._loadAccountInfo = accountInfoPageLoader;
-    this._loadAccountHistory = accountHistoryPageLoader;
-    this._loadCurrency = currencyPageLoader;
-    this._currencyReady = currencyPageReady;
-    this._currencyLeave = currencyPageLeave;
-    this._logout = logoutPageLoader;
+  constructor(callbacks) {
+    this._networkCheck = callbacks.networkCheck;
+    this._tokenCheck = callbacks.tokenCheck;
+    this._loadAtm = callbacks.atmPageLoader;
+    this._loadLogin = callbacks.loginPageLoader;
+    this._loadAccount = callbacks.accountPageLoader;
+    this._loadAccountInfo = callbacks.accountInfoPageLoader;
+    this._loadAccountHistory = callbacks.accountHistoryPageLoader;
+    this._loadCurrency = callbacks.currencyPageLoader;
+    this._currencyReady = callbacks.currencyPageReady;
+    this._currencyLeave = callbacks.currencyPageLeave;
+    this._logout = callbacks.logoutPageLoader;
 
     this._router = new Navigo('/');
 
     // Проверка, которая будет выполняться перед загрузкой страниц
     const before = (done) => {
-      /* Если пользователь не авторизован
-       * отправляем на страницу авторизации */
-      if (!this._isOnline()) {
+      /* Проверяем соединение и токен */
+      const isOnline = this._networkCheck();
+      const hasToken = this._tokenCheck();
+
+      // Если сеть недоступна - прерываем переход
+      if (!isOnline) {
         done(false);
-        this._router.navigate('login');
-      } else done();
+
+        // Если сеть доступна - проверяем токен
+      } else {
+        /* Если пользователь не авторизован
+         * отправляем на страницу авторизации */
+        if (!hasToken) {
+          done(false);
+          this._router.navigate('login');
+        } else done();
+      }
     };
 
     // Навигация по сайту
     this._router.on({
       '/': {
+        // переадресация на страницу со счетами
         uses: () => this._router.navigate('account'),
         hooks: { before },
       },
-      '/login': this._loadLogin,
+      // если пользователь уже авторизован - отправляем на страницу со счетами
+      '/login': () => {
+        this._tokenCheck()
+          ? this._router.navigate('account')
+          : this._loadLogin();
+      },
       '/account/:id': {
         uses: this._loadAccountInfo,
         hooks: { before },
@@ -143,12 +139,9 @@ export default class Router {
         hooks: { before },
       },
       '/logout': {
-        uses: this._logout,
-        hooks: {
-          before,
-          after: () => {
-            this._router.navigate('login');
-          },
+        uses: () => {
+          this._logout();
+          this._router.navigate('login');
         },
       },
     });
@@ -163,8 +156,11 @@ export default class Router {
     this._router.updatePageLinks();
   }
 
-  /** Переход на другую страницу
-   *  @param {string} url Новый адрес */
+  /**
+   * Переход на другую страницу
+   *
+   *  @param {string} url Новый адрес
+   */
   navigate(url) {
     this._router.navigate(url);
   }

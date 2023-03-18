@@ -1,44 +1,96 @@
+// eslint-disable-next-line no-unused-vars
+import * as Type from '../helpers/typedef';
 import { el } from 'redom';
 import Chart from 'chart.js/auto';
 import Component from './component';
+/**
+ * @typedef {Type.Account} Account
+ * @typedef {Type.Transaction} Transaction
+ * @typedef ChartItem
+ * @type {object}
+ * @property {string} period Месяц
+ * @property {number} in Сумма входящих платежей
+ * @property {number} out Сумма исходящих платежей
+ */
 
+/** @constant */
 const COLOR_RED = '#FD4E5D';
+
+/** @constant */
 const COLOR_BLUE = '#116ACC';
+
+/** @constant */
 const COLOR_GREEN = '#76CA66';
 
+/**
+ * Представляет компонет с графиком
+ *
+ * @module AccountChart
+ * @augments Component
+ */
 export default class AccountChart extends Component {
   /**
-
-   */
-  /** @type {string} */
+   * Тип графика `dynamics` или `ratio`
+   *
+   * @protected
+    @type {string} */
   _type;
 
-  /** @type {string} */
+  /**
+   * Идентификатор счёта
+   *
+   * @protected
+    @type {string} */
   _account;
 
-  /** @type {number} */
+  /**
+   * Баланс
+   *
+   * @protected
+    @type {number} */
   _balance;
 
-  /** @type {object[]} */
+  /**
+   * Список транзакций
+   *
+   * @protected
+    @type {Transaction[]} */
   _transactions;
 
-  /** @type {number} */
+  /**
+   * Количество отображаемых колонок
+   *
+   * @protected
+    @type {number} */
   _columnsCount = 12;
 
-  /** @type {Chart} */
+  /**
+   * График
+   *
+   * @protected
+    @type {Chart} */
   _chart;
 
-  /** @type {object[]} */
+  /**
+   * Отображаемые данные
+   *
+   * @protected
+    @type {ChartItem[]} */
   _data;
 
-  constructor(
-    { account, balance, transactions, type = 'dynamics' },
-    columnsCount = 12
-  ) {
+  /**
+   * Создаёт экземпляр `AccountChart`
+   *
+   * @param {Account} account Объект счёта пользователя
+   * @param {string} type Тип графика: `dynamics` или `ratio`
+   * @param {number} columnsCount Количество отображаемых колонок
+   * @class AccountChart
+   */
+  constructor(account, type = 'dynamics', columnsCount = 12) {
     super();
-    this._account = account;
-    this._balance = balance;
-    this._transactions = transactions;
+    this._account = account.account;
+    this._balance = account.balance;
+    this._transactions = account.transactions;
     this._type = type;
     this._container = el('canvas#acquisitions');
 
@@ -63,20 +115,14 @@ export default class AccountChart extends Component {
     }
   }
 
-  // // Переключает вид между 6 и 12 месяцев
-  // redraw() {
-  //   this._columnsCount = this._columnsCount === 12 ? 6 : 12;
-  //   this._chart.destroy();
-  //   this._chart = this.drawChart(
-  //     this._container,
-  //     this.getLastDataItems(),
-  //     this._type !== 'dynamics'
-  //   );
-  //}
-  // get html() {
-  //   return this._container;
-  // }
-
+  /**
+   * Создаёт объект графика
+   *
+   * @param {HTMLCanvasElement} cavas Элемент `HTMLCanvasElement` на котором будет отрисован график
+   * @param {ChartItem[]} data Массив объектов `ChartItem` для отображения на графике
+   * @param {boolean} stacked Если `true` будет построен график в виде стопок.
+   * @returns {Chart} График `Chart`
+   */
   drawChart(cavas, data, stacked = false) {
     let min, med, max;
 
@@ -253,6 +299,11 @@ export default class AccountChart extends Component {
     return new Chart(cavas, params);
   }
 
+  /**
+   * Преобразует все транзакции в массив данных для графика
+   *
+   * @returns {ChartItem[]} Массив объектов для отображения в графике
+   */
   transactionsToChartData() {
     const newarray = this._transactions.map((el) => ({
       // если отправитель не равен текущему счёту > входящий
@@ -288,22 +339,22 @@ export default class AccountChart extends Component {
     });
 
     // формируем новый массив объектов в удобном формате
-    const obj2 = [];
+    const chartItems = [];
     for (let prop in holder) {
-      obj2.push({
+      chartItems.push({
         period: prop.slice(0, 3),
         dinamic: holder[prop].dinamic,
         in: holder[prop].in,
         out: holder[prop].out,
       });
     }
-    return obj2;
+    return chartItems;
   }
 
-  /** Возвращает количество последних элементов, указанное в columnsCount */
+  /**
+   * @returns {ChartItem[]} Возвращает заданное при инициализации количество элементов ChartItem
+   */
   getLastDataItems() {
-    const result = this._data.slice(-this._columnsCount);
-    console.log('[getLastItems] result:', result);
-    return result;
+    return this._data.slice(-this._columnsCount);
   }
 }

@@ -1,10 +1,19 @@
+/* Импорт CSS-стилей */
 import './styles/style.css';
+
+/** Импорт всех SVG-файлов */
+function loadAllSvg() {
+  // eslint-disable-next-line no-undef
+  const context = require.context('./assets/', true, /\.svg$/);
+  context.keys().forEach((file) => context(file));
+}
+loadAllSvg();
 
 import { el, mount } from 'redom';
 import PageHeader from './components/page-header';
 import LoginBox from './components/login-box.js';
 import Atm from './pages/atm';
-import ServerAPI from './serverApi';
+import ServerAPI from './server-api';
 import AccountsList from './pages/accounts';
 import CurrencyPage from './pages/currency';
 import RateChange from './components/rate-change';
@@ -15,155 +24,235 @@ import AccountHistoryPage from './pages/history';
 
 /** Формирует страницу с банкоматами */
 function atmPageLoader() {
-  document.title = 'Банкоматы';
-  main.replaceChildren();
+  if (isOnline) {
+    document.title = 'Банкоматы';
 
-  const atm = new Atm(() => {
-    server.getBanks().then((data) => {
-      data.forEach((point) => {
-        atm.setMapPoint(point.lat, point.lon);
+    if (isOnline) {
+      main.replaceChildren();
+
+      const atm = new Atm(async () => {
+        const response = await server.getBanks();
+
+        response.forEach((point) => {
+          atm.setMapPoint(point.lat, point.lon);
+        });
+        atm.centerMap();
       });
-      atm.centerMap();
-    });
-  });
-
-  main.replaceChildren(atm.html);
+      main.replaceChildren(atm.html);
+    }
+  }
 }
 
 /** Формирует страницу с валютами */
-function currencyPageLoader() {
-  document.title = 'Валютный обмен';
-  const currencyPage = new CurrencyPage();
-  server
+async function currencyPageLoader() {
+  if (isOnline) {
+    document.title = 'Валютный обмен';
+    const currencyPage = new CurrencyPage();
+
     // Загружаем валюты пользователя
-    .getCurrencies()
-    .then((data) => {
-      const currencies = Object.values(data.payload);
-      // вписываем в соответствующий компонент
-      currencyPage.currencies = currencies;
+    const data = await server.getCurrencies();
 
-      // передаём коды валют в форму обмена
-      currencyPage._exchangeBox.userCurrencies = currencies.map(
-        (el) => el.code
-      );
+    const currencies = Object.values(data.payload);
+    // вписываем в соответствующий компонент
+    currencyPage.currencies = currencies;
 
-      // Добавляем обработчик `submit` для формы обмена валют
-      currencyPage._exchangeBox.addSubmitHandler((e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
+    // передаём коды валют в форму обмена
+    currencyPage._exchangeBox.userCurrencies = currencies.map((el) => el.code);
 
-        const obj = {};
-        for (const pair of formData.entries()) {
-          obj[pair[0]] = pair[1];
-        }
-        console.log(obj);
-        // отправляем сообщение на сервер
-        server.buyCurrency(obj).then((data) => {
-          // if error...
+    // Добавляем обработчик `submit` для формы обмена валют
+    currencyPage._exchangeBox.addSubmitCallback((e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
 
-          // Ответ передаём в компонент валют пользователя
-          currencyPage._userCurrencies.currencies = Object.values(data.payload);
-        });
-      });
-      currencyPage.setNewCurrencyRate(currencyRate);
-    })
-    .then(() => {
-      server.getAllCurrencies().then((data) => {
-        console.log(data.payload);
-        currencyPage._exchangeBox.avaliableCurrencies = data.payload;
-      });
+      const obj = {};
+      for (const pair of formData.entries()) {
+        obj[pair[0]] = pair[1];
+      }
+
+      // отправляем сообщение на сервер
+      const response = server.buyCurrency(obj);
+
+      // if error...
+
+      // Ответ передаём в компонент валют пользователя
+      currencyPage._userCurrencies.currencies = Object.values(response.payload);
     });
-  main.replaceChildren(currencyPage.html);
-  router.update();
-  console.log('currency page');
+    currencyPage.setNewCurrencyRate(currencyRate);
+
+    const currenciesData = await server.getAllCurrencies();
+
+    console.log(data.payload);
+    currencyPage._exchangeBox.avaliableCurrencies = currenciesData.payload;
+
+    main.replaceChildren(currencyPage.html);
+    router.update();
+  }
 }
 
-/** Формирует страницу с информацией о счёте
- * @param {*} params
+/**
+ * Формирует страницу с информацией о счёте
+ *
+ * @typedef {import('navigo').Match} Match
+ * @param {Match} match Параметры адресной строки
  */
-function accountInfoPageLoader(params) {
-  const account = params.data.id;
-  document.title = `Просмотр счёта`;
+async function accountInfoPageLoader(match) {
+  if (isOnline) {
+    const account = match.data.id;
+    document.title = `Просмотр счёта`;
 
-  server.getAccount(account).then((data) => {
-    const accountInfo = new AccountInfoPage(data.payload, () => {
-      console.log('it works!');
-      router.navigate(`history/${data.payload.account}`);
+    // Запрашиваем информацию о счёте
+    const data = await server.getAccount(account);
+
+    // Создаём объект страницы с информацией о счёте
+    const accountInfo = new AccountInfoPage({
+      account: data.payload,
+      // передаём функцию-обработчик для перехода на страницу с подробным графиком
+      chartsCallback: () => router.navigate(`history/${data.payload.account}`),
+
+      // передаём функцию-обработчик для перевода средств на другой счёт
+      transactionCallback: async (fund) => {
+        const resp = await server.transferFunds(fund);
+        if (resp.error === '') {
+          accountInfo.updateInfo(resp.payload);
+        } else {
+          switch (resp.error) {
+            case `Overdraft prevented`: //
+              break;
+            case 'Invalid account to': //
+              break;
+            case `Invalid amount`: //
+              break;
+          }
+        }
+      },
     });
     main.replaceChildren(accountInfo.html);
+
+    // обновляем ссылки navigo
     router.update();
-  });
+  }
 }
 
-/** Формирует страницу с информацией о счёте
- * @param {*} params
+/**
+ * Формирует страницу с информацией о счёте
+ *
+ * @typedef {import('navigo').Match} Match
+ * @param {Match} params Параметры объекта навигации
  */
-function accountHistoryPageLoader(params) {
-  const account = params.data.id;
-  document.title = `История баланса`;
-  console.log(document.title);
-  server.getAccount(account).then((data) => {
-    const accountHistory = new AccountHistoryPage(data.payload);
+async function accountHistoryPageLoader(params) {
+  if (isOnline) {
+    const account = params.data.id;
+    document.title = `История баланса`;
+
+    const data = await server.getAccount(account);
+
+    const accountHistory = new AccountHistoryPage({
+      account: data.payload,
+    });
     main.replaceChildren(accountHistory.html);
+
+    // обновляем ссылки navigo
     router.update();
-  });
+  }
 }
 
 /** Открывает страницу пользователя со счетами */
-function accountPageLoader() {
-  document.title = 'Счета';
+async function accountPageLoader() {
+  if (isOnline) {
+    document.title = 'Счета';
 
-  const accountsList = new AccountsList(() => {
-    server.createAccount().then((data) => {
-      accountsList.addAccountToList(data.payload);
+    // создаём список счетов
+    const accountsList = new AccountsList(async () => {
+      // в качестве Callback- создаём новый счёт
+      const data = await server.createAccount();
+      accountsList.addAccount(data.payload);
     });
-  });
 
-  server.getAccounts().then((data) => {
+    const data = await server.getAccounts();
     const accounts = data.payload;
-    console.log('accounts', accounts);
+
+    console.log('accounts: ', accounts);
     if (accounts) {
       accounts.forEach((acc) => {
-        accountsList.addAccountToList(acc);
+        accountsList.addAccount(acc);
       });
     }
+
+    main.replaceChildren(accountsList.html);
+
+    // обновляем ссылки navigo
     router.update();
-  });
-  main.replaceChildren(accountsList.html);
+  }
 }
 
 /** Формирует страницу авторизации*/
 function loginPageLoader() {
-  document.title = 'Главная';
+  document.title = 'Авторизация';
   const loginBox = new LoginBox(onLogin);
   main.replaceChildren(loginBox.html);
 }
+
 /** Удаляет access_token */
 function onLogout() {
-  server.logout();
   header.removeNavbar();
+  server.logout();
 }
 
-/** Callback-функция вызывается событием `submit` формы авторизации */
-function onLogin({ login, password }) {
-  //server.login('developer', 'skillbox').then((response) => {
-  server.login(login, password).then((response) => {
+/**
+ * Callback-функция вызывается событием `submit` формы авторизации
+ *
+ *  @typedef Auth
+ *  @type {object}
+ *  @property {string} login Логин
+ *  @property {string} password Пароль
+ *  @param {LoginBox} loginBox Компонент авторизации
+ *  @param {Auth} auth Логин и пароль
+ */
+async function onLogin(loginBox, auth) {
+  if (isOnline) {
+    // Выполняем запрос авторизации на сервер
+    const response = await server.login(auth.login, auth.password);
+
     if (response?.error) {
-      console.log(response.error);
+      const error = response.error;
+      console.log('ERROR: ', error);
+      if (error.includes('user')) loginBox.setInputError('user');
+      if (error.includes('password')) loginBox.setInputError('password');
     }
-    if (server.isOnline) {
-      router.navigate('account');
-      header.addNavbar();
-      router.update();
+    if (server.hasToken) {
+      const delay = 600;
+      new Promise(() => {
+        setTimeout(() => {
+          // Посвечиваем логин
+          loginBox.setInputOK('user');
+          new Promise(() => {
+            setTimeout(() => {
+              // затем поле пароля
+              loginBox.setInputOK('password');
+              new Promise(() => {
+                setTimeout(() => {
+                  // затем выполним переход
+                  router.navigate('account');
+                  header.addNavbar();
+                  router.update();
+                }, delay * 2);
+              }, delay);
+            }, delay);
+          });
+        }, delay);
+      });
     }
-  });
+  }
 }
 
 const server = new ServerAPI();
 const header = new PageHeader();
 
+// Получаем информацию о соединении
+let isOnline = navigator.onLine;
+
 //если пользователь авторизовался - отображаем навигаю по сайту
-if (server.isOnline) header.addNavbar();
+if (server.hasToken) header.addNavbar();
 
 // Добавляем <header> на страницу
 mount(window.document.body, header.html);
@@ -171,6 +260,16 @@ mount(window.document.body, header.html);
 // Добавляем <main> на страницу
 const main = el('main');
 mount(window.document.body, main);
+
+// Добавляем обработчики изменения сетевого статуса
+window.addEventListener('online', () => {
+  isOnline = true;
+  header.setOfflineLabel(!isOnline);
+});
+window.addEventListener('offline', () => {
+  isOnline = false;
+  header.setOfflineLabel(!isOnline);
+});
 
 // Создаём компонет курса валют
 const currencyRate = new CurrenciesRate();
@@ -195,7 +294,8 @@ const websocketHandlers = {
 
 // И создаём маршрутизатор для страницы и передаём в него все обработчики
 const router = new Router({
-  isOnline: () => server.isOnline,
+  networkCheck: () => isOnline,
+  tokenCheck: () => server.hasToken,
   atmPageLoader,
   loginPageLoader,
   accountPageLoader,
@@ -203,7 +303,7 @@ const router = new Router({
   accountHistoryPageLoader,
   currencyPageLoader,
   currencyPageReady: () => {
-    if (server.isOnline) {
+    if (server.hasToken) {
       // получаем сообщения от сервера
       server.feedCurrency(websocketHandlers);
     }

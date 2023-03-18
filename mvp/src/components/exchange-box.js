@@ -1,10 +1,11 @@
 import { el } from 'redom';
 import Component from './component';
 
+/**
+ * @module ExchangeBox
+ * @augments Component
+ */
 export default class ExchangeBox extends Component {
-  #userCurrencies;
-  #avaliableCurrencies;
-
   /** @type {HTMLFormElement} */
   _form;
 
@@ -18,6 +19,9 @@ export default class ExchangeBox extends Component {
   /** @type {HTMLInputElement} */
   _inputAmount;
 
+  /**
+   * @class ExchangeBox
+   */
   constructor() {
     super();
     this._container = el('.exchange-box exchange__exchange-box', [
@@ -69,7 +73,12 @@ export default class ExchangeBox extends Component {
     });
   }
 
-  addSubmitHandler(handler) {
-    this._form.addEventListener('submit', handler);
+  /**
+   * @callback submitCallback
+   * @param {SubmitEvent}
+   * @param {submitCallback} onSubmit
+   */
+  addSubmitCallback(onSubmit) {
+    this._form.addEventListener('submit', onSubmit);
   }
 }

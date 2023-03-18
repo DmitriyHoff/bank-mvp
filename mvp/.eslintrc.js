@@ -4,12 +4,21 @@ module.exports = {
     browser: true,
     es2021: true,
   },
-  plugins: ["prettier"],
-  extends: ["eslint:recommended", "plugin:prettier/recommended"],
+  plugins: ['prettier', 'jsdoc'],
+  extends: [
+    'eslint:recommended',
+    'plugin:prettier/recommended',
+    'plugin:jsdoc/recommended',
+  ],
   overrides: [],
   parserOptions: {
-    ecmaVersion: "latest",
-    sourceType: "module",
+    ecmaVersion: 'latest',
+    sourceType: 'module',
   },
   rules: {},
+  settings: {
+    jsdoc: {
+      mode: 'typescript',
+    },
+  },
 };

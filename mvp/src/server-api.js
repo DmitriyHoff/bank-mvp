@@ -1,7 +1,13 @@
-/** @constant {string} */
-const DEFAULT_URL = 'http://localhost:3000';
-
+/**
+ * Описывает взаимодействие с сервером
+ *
+ * @module ServerAPI
+ * @augments EventTarget
+ */
 export default class ServerAPI extends EventTarget {
+  /** @constant {string} */
+  static DEFAULT_URL = 'http://localhost:3000';
+
   /** @type {string} */
   _url;
 
@@ -9,20 +15,25 @@ export default class ServerAPI extends EventTarget {
   _token;
 
   /** @type {boolean} */
-  _isOnline;
+  _hasToken;
 
   /** @type {WebSocket} */
   _socket;
 
-  /** @param {string} url */
-  constructor(url = DEFAULT_URL) {
+  /**
+   * Инициализирует экземпляр класса ServerAPI
+   *
+   * @param {string} url Адрес сервера
+   * @class ServerAPI
+   */
+  constructor(url = ServerAPI.DEFAULT_URL) {
     super();
     this._url = url;
     this.loadToken();
   }
 
-  get isOnline() {
-    return this._isOnline;
+  get hasToken() {
+    return this._hasToken;
   }
 
   /** Записывает полученный `access_token` в `localStorage` */
@@ -33,12 +44,18 @@ export default class ServerAPI extends EventTarget {
   /** Загружает `access_token` из `localStorage` */
   loadToken() {
     this._token = window.localStorage.getItem('access_token');
-    if (this._token) this._isOnline = true;
+    if (this._token) this._hasToken = true;
   }
   /**
+   * @typedef ServerResponse
+   * @type {object}
+   * @property {object} data
+   *
    * Выполняет попытку авторизации на сервере
+   * @property {object} error
    * @param {string} login Логин
    * @param {string} password Пароль
+   * @returns {ServerResponse}
    */
   async login(login, password) {
     let url = new URL(this._url + '/login');
@@ -55,12 +72,17 @@ export default class ServerAPI extends EventTarget {
     console.log('[server: login] ', data);
     this._token = data.payload?.token;
     if (this._token) {
-      this._isOnline = true;
+      this._hasToken = true;
       this.saveToken();
     }
     return data;
   }
 
+  /**
+   * Возвращает список счетов пользователя.
+   *
+   * @returns {ServerResponse}
+   */
   async getAccounts() {
     const response = await fetch(this._url + '/accounts', {
       headers: {
@@ -68,10 +90,15 @@ export default class ServerAPI extends EventTarget {
       },
     });
     const data = await response.json();
-    console.log(data);
+    //console.log(data);
     return data;
   }
 
+  /**
+   *
+   * @param {*} id
+   * @returns
+   */
   async getAccount(id) {
     const response = await fetch(this._url + '/account/' + id, {
       headers: {
@@ -83,6 +110,10 @@ export default class ServerAPI extends EventTarget {
     return data;
   }
 
+  /**
+   *
+   * @returns
+   */
   async createAccount() {
     const response = await fetch(this._url + '/create-account', {
       method: 'POST',
@@ -95,17 +126,19 @@ export default class ServerAPI extends EventTarget {
     return data;
   }
 
-  async transferFunds(from, to, amount) {
+  /**
+   * @typedef {import('./helpers/typedef').TransferFund} TransferFund
+   * @param {TransferFund} fund
+   * @returns
+   */
+  async transferFunds(fund) {
     const response = await fetch(this._url + '/transfer-funds', {
       method: 'POST',
       headers: {
         Authorization: `Basic ${this._token}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        from,
-        to,
-        amount,
-      }),
+      body: JSON.stringify(fund),
     });
     const data = await response.json();
     console.log('[server: transfer funds] ', data);
@@ -182,7 +215,7 @@ export default class ServerAPI extends EventTarget {
   logout() {
     window.localStorage.removeItem('access_token');
     this._token = null;
-    this._isOnline = false;
+    this._hasToken = false;
     console.log('[server: logout]');
   }
 }

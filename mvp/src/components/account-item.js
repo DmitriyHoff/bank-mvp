@@ -1,9 +1,18 @@
 // eslint-disable-next-line no-unused-vars
-import * as Type from '../typedef';
+import * as Type from '../helpers/typedef';
+/**
+ * @typedef {Type.Account} Account
+ * @typedef {Type.Transaction} Transaction
+ */
+
 import { el } from 'redom';
 // import Transaction from './transaction';
 import Component from './component';
 
+/**
+ * @module AccountItem
+ * @augments Component
+ */
 export default class AccountItem extends Component {
   /** @type {string} */
   _id;
@@ -11,14 +20,14 @@ export default class AccountItem extends Component {
   /** @type {number} */
   _balance;
 
-  /**
-   * @typedef {Type.Transaction} Transaction
-   * @type {Transaction} */
+  /** @type {Transaction} */
   _lastTransaction;
 
   /**
-   * @typedef {Type.Account} Account
-   * @param {Account} account
+   * Инициализирует экземпляр объекта AccountItem
+   *
+   * @param {Account} account Информация о счёте
+   * @class AccountItem
    */
   constructor(account) {
     super();
@@ -54,7 +63,11 @@ export default class AccountItem extends Component {
     );
   }
 
-  /** Формирует строку с датой последней транзакции */
+  /**
+   * Формирует строку с датой последней транзакции
+   *
+   * @returns {string} Дата в виде строки или `-`
+   */
   get lastTransactionDate() {
     const options = {
       year: 'numeric',

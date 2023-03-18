@@ -1,6 +1,14 @@
+// eslint-disable-next-line no-unused-vars
+import * as Type from '../helpers/typedef';
+/** @typedef {Type.RateChange} RateChange */
+
 import { el } from 'redom';
 import Component from './component';
 
+/**
+ * @module RateChange
+ * @augments Component
+ */
 export default class RateChange extends Component {
   /** @type {string} */
   _from;
@@ -12,20 +20,14 @@ export default class RateChange extends Component {
   _change;
 
   /**
-   * @typedef RateChangeParams
-   * @type {object}
-   * @property {string} from Код валюты, из которой производится конвертирование
-   * @property {string} to Код валюты, в которую производится конвертирование
-   * @property {number} rate  Курс обмена валют
-   * @property {number} change изменение курса по отношению к предыдущему значению:
-   * `1` - возрастание курса, `-1` - убывание курса, `0` - курс не изменился.
-   * @param {RateChangeParams} data
+   * @param {RateChange} data
+   * @class RateChange
    */
   constructor(data) {
     super();
     this._from = data.from;
     this._to = data.to;
-    this._rate = parseFloat(data.rate);
+    this._rate = parseFloat(data.rate).toFixed(2);
     this._change = parseInt(data.change);
     this._container = el('li.currencies-rate__list-item', [
       el('p.currencies-rate__list-key', `${this._from}/${this._to}`),

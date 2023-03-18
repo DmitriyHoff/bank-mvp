@@ -1,13 +1,33 @@
 import { el } from 'redom';
 import Component from './component';
+// eslint-disable-next-line no-unused-vars
+import * as Type from '../helpers/typedef';
+/** @typedef {Type.RateChange} RateChange */
 
+/**
+ * @module CurrenciesRate
+ * @augments Component
+ */
 export default class CurrenciesRate extends Component {
-  /** @type {[]RateChange} */
+  /**
+   * Список объектов
+   *
+   * @protected
+    @type {RateChange[]} */
   _pairs = [];
 
-  /** @type {HTMLElement} */
+  /**
+   * Список, отражающий курс валют
+   *
+   * @protected
+    @type {HTMLElement} */
   _list;
 
+  /**
+   * Создаёт экземпляр объекта CurrenciesRate
+   *
+   * @class CurrenciesRate
+   */
   constructor() {
     super();
     this._list = el('ul.currencies-rate__list');
@@ -19,6 +39,7 @@ export default class CurrenciesRate extends Component {
 
   /**
    * Обновляет валютную пару или добавляет новую
+   *
    * @param {RateChange} newRate
    */
   pushRate(newRate) {

@@ -5,21 +5,29 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint --fix \"src/**/*.js\"",
     "dev": "webpack serve --mode=development",
-    "build": "webpack --mode=production --env prod"
+    "build": "webpack --mode=production --env prod",
+    "doc": "jsdoc -r ./src/"
   },
   "author": "Dmitriy Hoff",
   "license": "ISC",
   "devDependencies": {
+    "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.3",
     "css-minimizer-webpack-plugin": "^4.2.2",
     "eslint": "^8.35.0",
     "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-jsdoc": "^40.0.3",
     "eslint-plugin-prettier": "^4.2.1",
     "html-webpack-plugin": "^5.5.0",
+    "jsdoc": "^4.0.2",
     "mini-css-extract-plugin": "^2.7.2",
     "prettier": "^2.8.4",
     "style-loader": "^3.3.1",
+    "svg-inline-loader": "^0.8.2",
+    "svg-sprite-loader": "^6.0.11",
+    "svgo-loader": "^4.0.0",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.11.1"

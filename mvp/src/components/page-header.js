@@ -1,9 +1,13 @@
 import { el } from 'redom';
 import Component from './component';
 
+/**
+ * @module PageHeader
+ * @augments Component
+ */
 export default class PageHeader extends Component {
   /** @type {HTMLElement} */
-  _container;
+  _logo;
 
   /** @type {HTMLElement} */
   _navBar;
@@ -11,6 +15,9 @@ export default class PageHeader extends Component {
   /** @type {boolean} */
   _hasNav;
 
+  /**
+   * @class PageHeader
+   */
   constructor() {
     super();
     this._navBar = el(
@@ -46,11 +53,8 @@ export default class PageHeader extends Component {
         ),
       ])
     );
-
-    this._container = el('header.header', el('.header__logo', 'Coin.'));
-  }
-  get html() {
-    return this._container;
+    this._logo = el('.header__logo', 'Coin.');
+    this._container = el('header.header', this._logo);
   }
 
   /** Добавляет панель навигации */
@@ -67,5 +71,14 @@ export default class PageHeader extends Component {
       this._navBar.remove();
     }
     this._hasNav = !this._hasNav;
+  }
+
+  /**
+   * Устанавливает надпись `offline` на логотипе
+   *
+   * @param {boolean} isOffline текущий статус
+   */
+  setOfflineLabel(isOffline) {
+    this._logo.classList.toggle('header__logo--offline', isOffline);
   }
 }
