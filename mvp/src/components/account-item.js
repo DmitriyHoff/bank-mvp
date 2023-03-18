@@ -51,7 +51,7 @@ export default class AccountItem extends Component {
             el('p.account__last-transaction-label', 'Последняя транзакция'),
             el(
               'p.account__last-transaction-date',
-              `${this.lastTransactionDate}`
+              `${this.lastTransactionDateString}`
             ),
           ]),
           el('a.btn account__open-btn', 'Открыть', {
@@ -68,7 +68,7 @@ export default class AccountItem extends Component {
    *
    * @returns {string} Дата в виде строки или `-`
    */
-  get lastTransactionDate() {
+  get lastTransactionDateString() {
     const options = {
       year: 'numeric',
       month: 'long',
@@ -80,5 +80,9 @@ export default class AccountItem extends Component {
     if (this._lastTransaction) {
       return dateTimeFormat.format(new Date(this._lastTransaction.date));
     } else return '-';
+  }
+
+  get lastTransactionDate() {
+    return this._lastTransaction?.date;
   }
 }

@@ -68,6 +68,7 @@ export default class AccountPage {
     this._accountsList.replaceChildren(...children);
   }
   sortArray(type) {
+    console.log(type);
     switch (type) {
       case 'number':
         this._accountsListArray.sort((a, b) => a._id - b._id);
@@ -76,9 +77,11 @@ export default class AccountPage {
         this._accountsListArray.sort((a, b) => a._balance - b._balance);
         break;
       case 'date':
-        this._accountsListArray.sort(
-          (a, b) => a.lastTransactionDate - b.lastTransactionDate
-        );
+        this._accountsListArray.sort((a, b) => {
+          const date1 = Date.parse(a.lastTransactionDate);
+          const date2 = Date.parse(b.lastTransactionDate);
+          return date1 < date2 ? -1 : date1 > date2 ? 1 : 0;
+        });
         break;
     }
     this.refreshContainer();
