@@ -92,7 +92,6 @@ export default class TransactionBox extends Component {
     // добавляем обработчик события `submit` для формы
     this._form.addEventListener('submit', (e) => {
       e.preventDefault();
-      console.log('Submit');
 
       // Выполняем базовую проверку
       let hasError = false;
@@ -118,14 +117,14 @@ export default class TransactionBox extends Component {
 
     // добавляем обработчик события `input` для полей
     this._destInput.addEventListener('input', (e) => {
-      this._hasDestError = this.checkDestination();
       this.setWarningFrame(e.target, false);
+      this._hasDestError = this.checkDestination();
       this.checkSubmit();
     });
     // добавляем обработчик события `input` для полей
     this._amountInput.addEventListener('input', (e) => {
-      this._hasAmountError = this.checkAmount();
       this.setWarningFrame(e.target, false);
+      this._hasAmountError = this.checkAmount();
       this.checkSubmit();
     });
   }
@@ -149,6 +148,7 @@ export default class TransactionBox extends Component {
   setErrorText(input, text) {
     if (input instanceof HTMLInputElement) {
       input.parentElement.firstElementChild.innerHTML = text;
+      this.setWarningFrame(input, text !== '' || null);
     } else {
       if (input === 'dest') {
         this.setErrorText(this._destInput, text);
@@ -191,25 +191,23 @@ export default class TransactionBox extends Component {
   checkAmount() {
     const amount = this._amountInput.value;
     const minLength = amount.length > 0;
-
+    const floatTest = TransactionBox.REGEX_FLOAT.test(amount);
+    let hasError = false;
     if (!minLength) {
       this.setErrorText(this._amountInput, '');
-      return true;
-    }
-
-    const floatTest = TransactionBox.REGEX_FLOAT.test(amount);
-    if (!floatTest) {
+      hasError = true;
+    } else if (!floatTest) {
       this.setErrorText(this._amountInput, 'Некорректное число');
-      return true;
+      hasError = true;
+    } else {
+      this.setErrorText(this._amountInput, '');
     }
 
-    this.setErrorText(this._amountInput, '');
-    return false;
+    return hasError;
   }
 
   /** Проверяет поле суммы перевода */
   checkSubmit() {
-    console.log(parseFloat(this._amountInput.value));
     this._submitBtn.disabled =
       this._hasAmountError ||
       this._hasDestError ||
