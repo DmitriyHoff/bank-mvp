@@ -152,10 +152,13 @@ export default class TransactionBox extends Component {
     } else {
       if (input === 'dest') {
         this.setErrorText(this._destInput, text);
+        this._hasDestError = true;
       } else if (input === 'amount') {
         this.setErrorText(this._amountInput, text);
+        this._hasAmountError = true;
       }
     }
+    this.checkSubmit();
   }
   /**
    * Проверяет на корректность поле ввода номера счёта
