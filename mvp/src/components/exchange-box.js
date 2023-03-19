@@ -29,7 +29,7 @@ export default class ExchangeBox extends Component {
   _amountInput;
 
   /** @type {boolean} */
-  _hasAmountError;
+  _hasAmountError = true;
 
   /** @type {HTMLButtonElement} */
   _submitBtn;
@@ -77,10 +77,24 @@ export default class ExchangeBox extends Component {
     this._amountInput = this._container.querySelector('.input[name="amount"]');
     this._submitBtn = this._container.querySelector('.exchange-box__submit');
 
+    this._sourceSelect.addEventListener('change', () => {
+      Validator.setErrorText(this._amountInput, '');
+      // проверяем поле
+      this._hasAmountError = Validator.checkAmount(this._amountInput);
+      this.checkSubmit();
+    });
+
+    this._destSelect.addEventListener('change', () => {
+      Validator.setErrorText(this._amountInput, '');
+      // проверяем поле
+      this._hasAmountError = Validator.checkAmount(this._amountInput);
+      this.checkSubmit();
+    });
+
     // добавляем обработчик события `input` для поля суммы перевода
     this._amountInput.addEventListener('input', (e) => {
       // сбрасываем ошибку при вводе
-      Validator.setWarningFrame(e.target, false);
+      Validator.setErrorText(e.target, false);
 
       // проверяем поле
       this._hasAmountError = Validator.checkAmount(this._amountInput);
