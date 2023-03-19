@@ -43,9 +43,8 @@ export default class Atm extends Component {
   }
 
   /**
-   * Расположение банков на карте
-   *
-    @returns {BankPosition[]}*/
+    @returns {BankPosition[]} Расположение банков на карте
+   */
   get banks() {
     return this._banks;
   }

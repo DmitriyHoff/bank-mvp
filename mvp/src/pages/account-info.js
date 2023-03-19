@@ -124,4 +124,9 @@ export default class AccountInfoPage extends Component {
     const wrap = this._container.querySelector('.accounts__transactions-wrap');
     wrap.replaceChildren(this._transactionsList.html);
   }
+
+  /** Сбрасывает форму переводов */
+  resetTransactionBox() {
+    this._transactionsBox.reset();
+  }
 }

@@ -60,22 +60,34 @@ async function currencyPageLoader() {
     currencyPage._exchangeBox.userCurrencies = currencies.map((el) => el.code);
 
     // Добавляем обработчик `submit` для формы обмена валют
-    currencyPage._exchangeBox.addSubmitCallback((e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
+    currencyPage._exchangeBox.addSubmitCallback(async (exchangeBox, data) => {
+      // e.preventDefault();
+      // const formData = new FormData(e.target);
 
-      const obj = {};
-      for (const pair of formData.entries()) {
-        obj[pair[0]] = pair[1];
-      }
+      // const obj = {};
+      // for (const pair of formData.entries()) {
+      //   obj[pair[0]] = pair[1];
+      // }
 
       // отправляем сообщение на сервер
-      const response = server.buyCurrency(obj);
+      const response = await server.buyCurrency(data);
 
-      // if error...
+      if (response.error === '') {
+        // Ответ передаём в компонент валют пользователя
+        currencyPage._userCurrencies.currencies = Object.values(
+          response.payload
+        );
 
-      // Ответ передаём в компонент валют пользователя
-      currencyPage._userCurrencies.currencies = Object.values(response.payload);
+        // сбрасываем состояние
+        exchangeBox.reset();
+      } else {
+        console.log('ERROR', response);
+        switch (response.error) {
+          case `Not enough currency`:
+          case `Overdraft prevented`:
+            exchangeBox.setErrorText('amount', 'Недостаточно средств');
+        }
+      }
     });
     currencyPage.setNewCurrencyRate(currencyRate);
 
@@ -114,6 +126,8 @@ async function accountInfoPageLoader(match) {
         const resp = await server.transferFunds(fund);
         if (resp.error === '') {
           accountInfo.updateInfo(resp.payload);
+          // сбрасываем состояние
+          accountInfo.resetTransactionBox();
         } else {
           switch (resp.error) {
             case `Overdraft prevented`:

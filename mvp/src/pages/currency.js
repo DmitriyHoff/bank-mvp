@@ -5,6 +5,8 @@ import ExchangeBox from '../components/exchange-box';
 import Component from '../components/component';
 
 /**
+ * Представляет страницу с курсом валют
+ *
  * @module CurrencyPage
  * @augments Component
  */

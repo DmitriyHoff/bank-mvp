@@ -1,6 +1,6 @@
 import { el, svg, setChildren } from 'redom';
 import Component from './component';
-
+import Validator from '../helpers/validator';
 /**
  * Форма перевода средств
  *
@@ -8,12 +8,6 @@ import Component from './component';
  * @augments Component
  */
 export default class TransactionBox extends Component {
-  /**
-   * @constant {RegExp}
-   * @static
-   */
-  static REGEX_FLOAT = /^(\d|[1-9]+\d*|0\.\d+|[1-9]+\d*\.\d+)$/;
-
   /** @type {string} */
   _account;
 
@@ -81,8 +75,8 @@ export default class TransactionBox extends Component {
           this._destInput,
         ]),
         el('label.form__label transaction-box__label', 'Сумма перевода'),
-        el('.transaction-box__input-wrapper', [
-          el('p.transaction-box__error', ''),
+        el('.input-wrapper transaction-box__input-wrapper', [
+          el('p.error transaction-box__error', ''),
           this._amountInput,
         ]),
         this._submitBtn,
@@ -93,21 +87,6 @@ export default class TransactionBox extends Component {
     this._form.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      // Выполняем базовую проверку
-      let hasError = false;
-      const destAccount = this._destInput.value;
-      const amount = this._amountInput.value;
-      if (destAccount === this._account || destAccount === '') {
-        hasError = true;
-        this.setWarningFrame(this._destInput);
-      }
-      // Проверка корректности числа
-      if (amount === '' || !TransactionBox.REGEX_FLOAT.test(amount)) {
-        hasError = true;
-        this.setWarningFrame(this._amountInput);
-      }
-
-      if (hasError) return;
       this._onSubmit(this, {
         from: this._account,
         to: this._destInput.value,
@@ -115,28 +94,29 @@ export default class TransactionBox extends Component {
       });
     });
 
-    // добавляем обработчик события `input` для полей
+    // добавляем обработчик события `input` для поля номера счёта
     this._destInput.addEventListener('input', (e) => {
-      this.setWarningFrame(e.target, false);
-      this._hasDestError = this.checkDestination();
-      this.checkSubmit();
-    });
-    // добавляем обработчик события `input` для полей
-    this._amountInput.addEventListener('input', (e) => {
-      this.setWarningFrame(e.target, false);
-      this._hasAmountError = this.checkAmount();
-      this.checkSubmit();
-    });
-  }
+      // сбрасываем ошибку при вводе
+      Validator.setWarningFrame(e.target, false);
 
-  /**
-   * Устанавливает или убирает красную рамку с текстового поля
-   *
-   * @param {HTMLInputElement} input
-   * @param {boolean} warning
-   */
-  setWarningFrame(input, warning = true) {
-    input.classList.toggle('input--warning', warning);
+      // проверяем поле
+      this._hasDestError = this.checkDestination();
+
+      // проверяем возвожность выполнить запрос
+      this.checkSubmit();
+    });
+
+    // добавляем обработчик события `input` для поля суммы перевода
+    this._amountInput.addEventListener('input', (e) => {
+      // сбрасываем ошибку при вводе
+      Validator.setWarningFrame(e.target, false);
+
+      // проверяем поле
+      this._hasAmountError = Validator.checkAmount(this._amountInput);
+
+      // проверяем возвожность выполнить запрос
+      this.checkSubmit();
+    });
   }
 
   /**
@@ -147,14 +127,13 @@ export default class TransactionBox extends Component {
    */
   setErrorText(input, text) {
     if (input instanceof HTMLInputElement) {
-      input.parentElement.firstElementChild.innerHTML = text;
-      this.setWarningFrame(input, text !== '' || null);
+      Validator.setErrorText(input, text);
     } else {
       if (input === 'dest') {
-        this.setErrorText(this._destInput, text);
+        Validator.setErrorText(this._destInput, text);
         this._hasDestError = true;
       } else if (input === 'amount') {
-        this.setErrorText(this._amountInput, text);
+        Validator.setErrorText(this._amountInput, text);
         this._hasAmountError = true;
       }
     }
@@ -170,47 +149,30 @@ export default class TransactionBox extends Component {
     const minLength = dest.length > 0;
 
     if (!minLength) {
-      this.setErrorText(this._destInput, '');
+      Validator.setErrorText(this._destInput, '');
       return true;
     }
 
     const another = this._account !== dest;
     if (!another) {
-      this.setErrorText(this._destInput, 'Введите другой номер счёта');
+      Validator.setErrorText(this._destInput, 'Введите другой номер счёта');
       return true;
     }
 
-    this.setErrorText(this._destInput, '');
+    Validator.setErrorText(this._destInput, '');
     return false;
   }
-  /**
-   * Проверяет на корректность поле ввода суммы перевода
-   *
-   * @returns {boolean} Указывает на наличие ошибок
-   */
-  checkAmount() {
-    const amount = this._amountInput.value;
-    const minLength = amount.length > 0;
-    const floatTest = TransactionBox.REGEX_FLOAT.test(amount);
-    let hasError = false;
-    if (!minLength) {
-      this.setErrorText(this._amountInput, '');
-      hasError = true;
-    } else if (!floatTest) {
-      this.setErrorText(this._amountInput, 'Некорректное число');
-      hasError = true;
-    } else {
-      this.setErrorText(this._amountInput, '');
-    }
 
-    return hasError;
-  }
-
-  /** Проверяет поле суммы перевода */
+  /** Проверяет наличие ошибок и изменяет дотупность кнопки `Submit` */
   checkSubmit() {
     this._submitBtn.disabled =
       this._hasAmountError ||
       this._hasDestError ||
       parseFloat(this._amountInput.value) === 0;
+  }
+
+  reset() {
+    this._destInput.value = '';
+    this._amountInput.value = '';
   }
 }
