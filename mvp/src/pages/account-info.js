@@ -32,6 +32,9 @@ export default class AccountInfoPage extends Component {
   /** @type {TransactionBox} */
   _transactionsBox;
 
+  /** @type {HTMLElement} */
+  _balanceContainer;
+
   /** @type {import('../helpers/typedef').clickCallback} */
   _onChartsClick;
 
@@ -76,7 +79,10 @@ export default class AccountInfoPage extends Component {
       ]),
       el('.accounts__subheader', [
         el('p.accounts__id', `№ ${this._account}`),
-        el('p.accounts__balance', `Баланс: ${this.balanceLocaleString}`),
+        el('p.accounts__balance', [
+          el('span', `Баланс: `),
+          (this._balanceContainer = el('span', `${this.balanceLocaleString}`)),
+        ]),
       ]),
       el('.accounts__middle-container', [
         this._transactionsBox.html,
@@ -119,7 +125,7 @@ export default class AccountInfoPage extends Component {
   updateInfo(account) {
     this._account = account.account;
     this._balance = account.balance;
-
+    this._balanceContainer.innerText = this.balanceLocaleString;
     this._transactionsList = new TransactionsList(account);
     const wrap = this._container.querySelector('.accounts__transactions-wrap');
     wrap.replaceChildren(this._transactionsList.html);

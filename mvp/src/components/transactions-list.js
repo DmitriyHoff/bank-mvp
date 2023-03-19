@@ -66,7 +66,13 @@ export default class TransactionsList extends Component {
           el('td.transactions__table-cell', element.to),
           (amount = el(
             'td.transactions__table-cell',
-            `${isPositive ? '+' : '-'} ${element.amount.toFixed(2)}`
+            `${isPositive ? '+' : '-'} ${element.amount.toLocaleString(
+              'ru-RU',
+              {
+                style: 'currency',
+                currency: 'RUB',
+              }
+            )}`
           )),
           el(
             'td.transactions__table-cell',

@@ -239,6 +239,9 @@ ul {
   font: 400 13px/15px 'Work Sans', sans-serif;
 }
 
+.exchange__title {
+  margin-bottom: 25px;
+}
 .exchange__container {
   display: grid;
   column-gap: 50px;
