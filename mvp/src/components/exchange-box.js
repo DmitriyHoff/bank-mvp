@@ -126,7 +126,7 @@ export default class ExchangeBox extends Component {
 
   /**
    * @callback exchangeCallback
-   * @param {exchangeCallback} onSubmit
+   * @param {exchangeCallback} onSubmit Будет вызвана после события `submit`
    */
   addSubmitCallback(onSubmit) {
     this._form.addEventListener('submit', (e) => {

@@ -2,6 +2,7 @@
 
 :root {
   --color-primary: #116acc;
+  --color-primary-hover: #A0C3FF;
   --color-secondary: #182233;
   --color-grey-2: #374151;
   --color-grey-5: #9CA3AF;
@@ -551,4 +552,86 @@ ul {
 #map [class *= "searchbox-button"] {
   color: white;
   background-color: var(--color-primary);
+}
+
+
+.custom-select {
+  margin-left: 0;
+  margin-right: auto;
+  padding: 0;
+  width: 300px;
+  position: relative;
+  border: 1px solid var(--color-primary);
+  outline: none;
+  outline-offset: -2px;
+  border-radius: 10px;
+  font: 400 16px/24px 'Ubuntu', sans-serif;
+}
+.custom-select:focus {
+  border-width: 2px;
+}
+.custom-select select {
+  display: none;
+}
+.custom-select--selected {
+  padding: 10px 50px 10px 15px;
+  cursor: pointer;
+}
+.custom-select--selected::after {
+  position: absolute;
+  content: "";
+  top: 50%;
+  right: 32px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid transparent;
+  border-color: transparent var(--color-primary) var(--color-primary) transparent;
+  transition: all 0.3s ease-in-out;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.custom-select--selected.sort--desc::after {
+
+  transform: translateY(0) rotate(225deg);
+}
+.custom-select--selected.--arrow-active::after {
+  transform: rotate(45deg);
+  rotate: z 180deg;
+}
+.custom-select:hover {
+  border-color: var(--color-primary);
+}
+.custom-select:focus-visible {
+  outline: 2px solid var(--color-primary);
+  background-color: var(--color-primary-hover);
+}
+.custom-select:active {
+  border-color: var(--color-primary);
+}
+.custom-select__items {
+  position: absolute;
+
+  padding: 0;
+  background-color: #fff;
+  border: 2px solid #f7f7f7;
+  border-top: none;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 99;
+}
+.custom-select__items div {
+  color: #333;
+  padding: 10px 50px 10px 15px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.custom-select__items div:hover {
+  background-color: rgba(160, 195, 255, 0.1);
+}
+.custom-select--hide {
+  display: none;
+}
+.custom-select .same-as-selected {
+  background-color: var(--color-primary-hover);
 }

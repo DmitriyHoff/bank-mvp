@@ -1,5 +1,6 @@
 import { el, svg, setChildren } from 'redom';
 import AccountItem from '../components/account-item.js';
+import SortButton from '../components/sort-button.js';
 
 export default class AccountPage {
   /** @type {HTMLElement} */
@@ -21,20 +22,24 @@ export default class AccountPage {
    * @param {addAccountCallback} onAddAccount
    */
   constructor(onAddAccount = null) {
+    this._select = new SortButton((type, asc) => {
+      this.sortArray(type, asc);
+    });
     this._container = el('section.accounts', [
       el('.accounts__header', [
         el('h1.page-title accounts__title', 'Ваши счета'),
-        (this._select = el('select.input accounts__order', [
-          el('option.accounts__order-option', 'По номеру', {
-            value: 'number',
-          }),
-          el('option.accounts__order-option', 'По балансу', {
-            value: 'balance',
-          }),
-          el('option.accounts__order-option', 'По последней транзакции', {
-            value: 'date',
-          }),
-        ])),
+        // (this._select = el('select.input accounts__order', [
+        //   el('option.accounts__order-option', 'По номеру', {
+        //     value: 'number',
+        //   }),
+        //   el('option.accounts__order-option', 'По балансу', {
+        //     value: 'balance',
+        //   }),
+        //   el('option.accounts__order-option', 'По последней транзакции', {
+        //     value: 'date',
+        //   }),
+        // ])),
+        this._select.html,
         el('button.btn accounts__add-btn', ''),
       ]),
       el('ul.accounts__list'),
@@ -47,9 +52,9 @@ export default class AccountPage {
     const icon = svg('svg', svgParams, svg('use', { href: '#plus' }));
     setChildren(this._addButton, [icon, el('span', 'Создать новый счёт')]);
 
-    this._select.addEventListener('change', (e) => {
-      this.sortArray(e.target.value);
-    });
+    // this._select.addEventListener('change', (e) => {
+    //   this.sortArray(e.target.value);
+    // });
     if (onAddAccount) {
       this._addButton.addEventListener('click', onAddAccount);
     }
@@ -67,20 +72,29 @@ export default class AccountPage {
     });
     this._accountsList.replaceChildren(...children);
   }
-  sortArray(type) {
-    console.log(type);
+
+  /**
+   * Выполняет сортировку массива по критериям
+   *
+   * @param {string} type Поле, по которому будет производиться сортировка
+   * @param {boolean} asc `true` - по возрастанию, `false` - по убыванию
+   */
+  sortArray(type, asc) {
+    const invert = asc ? 1 : -1;
     switch (type) {
-      case 'number':
-        this._accountsListArray.sort((a, b) => a._id - b._id);
+      case 'by-number':
+        this._accountsListArray.sort((a, b) => (a._id - b._id) * invert);
         break;
-      case 'balance':
-        this._accountsListArray.sort((a, b) => a._balance - b._balance);
+      case 'by-balance':
+        this._accountsListArray.sort(
+          (a, b) => (a._balance - b._balance) * invert
+        );
         break;
-      case 'date':
+      case 'by-transaction':
         this._accountsListArray.sort((a, b) => {
-          const date1 = Date.parse(a.lastTransactionDate);
-          const date2 = Date.parse(b.lastTransactionDate);
-          return date1 < date2 ? -1 : date1 > date2 ? 1 : 0;
+          const date1 = new Date(a.lastTransactionDate);
+          const date2 = new Date(b.lastTransactionDate);
+          return (date1 < date2 ? -1 : date1 > date2 ? 1 : 0) * invert;
         });
         break;
     }

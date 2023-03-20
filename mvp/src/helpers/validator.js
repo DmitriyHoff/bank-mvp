@@ -6,10 +6,11 @@ export default class Validator {
    * @static
    */
   static REGEX_FLOAT = /^(\d|[1-9]+\d*|0\.\d+|[1-9]+\d*\.\d+)$/;
+
   /**
    * Проверяет на корректность поле ввода суммы перевода
    *
-   * @param {HTMLInput} amountInput Текстовое поле для валидации
+   * @param {HTMLInputElement} amountInput Текстовое поле для валидации
    * @returns {boolean} Указывает на наличие ошибок
    */
   static checkAmount(amountInput) {
@@ -33,8 +34,8 @@ export default class Validator {
   /**
    * Устанавливает или убирает красную рамку с текстового поля
    *
-   * @param {HTMLInputElement} input
-   * @param {boolean} warning
+   * @param {HTMLInputElement} input Элемент, к которому будет применена рамка
+   * @param {boolean} warning Состояние рамки. Если `false` рамка будет скрыта
    */
   static setWarningFrame(input, warning = true) {
     input.classList.toggle('input--warning', warning);
