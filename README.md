@@ -44,3 +44,12 @@ npm run dev
 ```shell
 npm run build
 ```
+
+### Скриншоты
+
+![Авторизация](./screenshots/Screenshot_login.png)
+![Счета](./screenshots/Screenshot_account.png)
+![Информация о счёте](./screenshots/Screenshot_balance.png)
+![История операций](./screenshots/Screenshot_history.png)
+![Обмен валют](./screenshots/Screenshot_exchange.png)
+![Карта банкоматов](./screenshots/Screenshot_banks.png)
